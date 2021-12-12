@@ -60,6 +60,7 @@
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_LEADER_UPDATE					, FTC.OnGroupChanged )
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_GROUP_MEMBER_CONNECTED_STATUS , FTC.OnGroupChanged )
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_GROUP_MEMBER_ROLE_CHANGED	   , FTC.OnGroupChanged )
+		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_ACTIVE_COMPANION_STATE_CHANGED , FTC.OnGroupChanged )
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_GROUP_SUPPORT_RANGE_UPDATE	, FTC.OnGroupRange )
 		
 		-- Experience Events
@@ -199,7 +200,7 @@
 			end
 
 		-- Group Updates
-		elseif ( IsUnitGrouped('player') and string.sub(unitTag, 0, 5) == "group"  and not(string.find(unitTag, "companion"))) then
+		elseif ( IsUnitGrouped('player') and string.sub(unitTag, 0, 5) == "group" or unitTag == "companion" ) then
 
 			-- Health
 			if ( powerType == POWERTYPE_HEALTH ) then

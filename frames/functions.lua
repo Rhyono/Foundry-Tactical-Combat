@@ -229,12 +229,16 @@
     function FTC.Frames:SetupGroup()
 
         -- Update data
-        FTC.Group.members = GetGroupSize()
+        FTC.Group.members = GetGroupSize() + GetNumCompanionsInGroup()
+		
+		local hasLocalCompanion = HasActiveCompanion() or HasPendingCompanion()
+		local hasLocalCompanionOnly = hasLocalCompanion and FTC.Group.members == 0
 
         -- Using group frame
         local context   = nil
-        if ( IsUnitGrouped('player') and GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
-            context = "Group"
+		local inGroup = IsUnitGrouped('player') or hasLocalCompanion
+        if ( inGroup and FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then 
+			context = "Group"
             FTC_RaidFrame:SetHidden(true) 
             ZO_UnitFramesGroups:SetHidden(true)
 
@@ -257,10 +261,31 @@
         local container = _G["FTC_"..context.."Frame"]
 
         -- Iterate over members
-        local max = ( context == "Group" ) and 4 or 24
+        local max = FTC.Group.members
+		if ( hasLocalCompanionOnly ) then
+			max = FTC.Vars.GroupHidePlayer and 1 or 2
+		end
+        d(max)
         for i = 1 , max do
             local frame   = container["member"..i]
-            local unitTag = GetGroupUnitTagByIndex(i)
+            local groupIndex = i
+            local isCompanion = false
+            if ( not hasLocalCompanionOnly and i > GetGroupSize() ) then
+                groupIndex = i - GetGroupSize()
+                isCompanion = true
+            end
+            local unitTag = GetGroupUnitTagByIndex(groupIndex)
+			if ( hasLocalCompanionOnly ) then
+				if ( FTC.Vars.GroupHidePlayer ) then
+					unitTag = "companion"
+				else
+					unitTag = i == 1 and "player" or "companion"
+				end
+			end
+
+            if ( isCompanion ) then
+                unitTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+            end
 
             -- Only proceed for members which exist
             if ( DoesUnitExist(unitTag) ) then
@@ -269,7 +294,26 @@
                 frame:SetHidden(false)
 
                 -- Configure the nameplate
-                local name      = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>",GetUnitName(unitTag))
+				local name
+				local pendingCompanionName
+				if ( unitTag == "companion" and HasPendingCompanion() ) then
+					pendingCompanionName = GetCompanionName(GetPendingCompanionDefId())
+					name = zo_strformat(SI_COMPANION_NAME_FORMATTER, pendingCompanionName)
+				elseif ( IsGroupCompanionUnitTag(unitTag) ) then
+					local playerGroupTag = GetLocalPlayerGroupUnitTag()
+					local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+					if ( playerCompanionTag == unitTag and HasPendingCompanion() ) then
+						pendingCompanionName = GetCompanionName(GetPendingCompanionDefId())
+						name = zo_strformat(SI_COMPANION_NAME_FORMATTER, pendingCompanionName)
+					else
+						name = GetUnitName(unitTag)
+					end
+				elseif ( IsUnitPlayer(unitTag) ) then
+					name = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>",GetUnitName(unitTag))
+				else
+					name = GetUnitName(unitTag)
+				end
+
                 local level     = GetUnitChampionPoints(unitTag) > 0 and "c" .. GetUnitChampionPoints(unitTag) or GetUnitLevel(unitTag)
                 local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
 
@@ -296,7 +340,8 @@
 
                 -- Populate group icons
                 elseif ( context == "Group" ) then
-                    frame.plate.icon:SetWidth(IsUnitGroupLeader(unitTag) and 24 or 0)
+                    local isLeader = IsUnitGroupLeader(unitTag) or hasLocalCompanionOnly and unitTag == "player"
+                    frame.plate.icon:SetWidth(isLeader and 24 or 0)
                     frame.plate.class:SetTexture(classIcon)
                     frame.plate.class:SetHidden(classIcon==nil)
                 end
@@ -336,7 +381,7 @@
 
         -- Using group frame
         local context   = nil
-        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+        if ( FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then 
             context = "Group"
 
         -- Using raid frames
@@ -347,7 +392,20 @@
         else return end
 
         -- Retrieve the frame
-        local i = GetGroupIndexByUnitTag(unitTag)
+        local groupUnitTag
+        local isCompanion
+        if (IsGroupCompanionUnitTag(unitTag)) then
+            groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+            isCompanion = true
+        else
+            groupUnitTag = unitTag
+            isCompanion = false
+        end
+        local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+        if (isCompanion) then
+            i = i + GetGroupSize()
+        end
         local frame = _G["FTC_"..context.."Frame"..i]
 
         -- Bail if the group member has not yet been set up
@@ -375,7 +433,7 @@
 
         -- Using group frame
         local context   = nil
-        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+        if ( FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then 
             context = "Group"
 
         -- Using raid frames
@@ -388,7 +446,20 @@
 		end
 
         -- Retrieve the frame
-        local i = GetGroupIndexByUnitTag(unitTag)
+        local groupUnitTag
+        local isCompanion
+        if (IsGroupCompanionUnitTag(unitTag)) then
+            groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+            isCompanion = true
+        else
+            groupUnitTag = unitTag
+            isCompanion = false
+        end
+        local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+        if (isCompanion) then
+            i = i + GetGroupSize()
+        end
         local frame = _G["FTC_"..context.."Frame"..i.."_Ultimate"]
 
         if frame then
@@ -431,13 +502,40 @@
             enabled = FTC.Vars.TargetFrame
 
         -- Group Frames
-        elseif ( string.sub(unitTag, 0, 5) == "group" ) then
+        elseif ( string.sub(unitTag, 0, 5) == "group" or unitTag == "companion" ) then
 
             -- Get the group member
-            local i = GetGroupIndexByUnitTag(unitTag)
+            local i
+            local hasLocalCompanion = HasActiveCompanion() or HasPendingCompanion()
+            local hasLocalCompanionOnly = hasLocalCompanion and FTC.Group.members == 0
+            if ( unitTag == "companion" ) then
+                if ( hasLocalCompanionOnly ) then
+                    i = FTC.Vars.GroupHidePlayer and 1 or 2
+                else
+                    return
+                end
+            elseif ( hasLocalCompanionOnly ) then
+                i = 1
+                unitTag = "player"
+            else
+                local groupUnitTag
+                local isCompanion
+                if (IsGroupCompanionUnitTag(unitTag)) then
+                    groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+                    isCompanion = true
+                else
+                    groupUnitTag = unitTag
+                    isCompanion = false
+                end
+                i = GetGroupIndexByUnitTag(groupUnitTag)
+
+                if (isCompanion) then
+                    i = i + GetGroupSize()
+                end
+            end
 
             -- Small group
-            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+            if ( FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then 
                 enabled = true
                 frame   = _G["FTC_GroupFrame" .. i]
 
@@ -546,10 +644,23 @@
         elseif ( string.sub(unitTag, 0, 5) == "group" and ( FTC.Vars.GroupFrames or FTC.Vars.RaidFrames ) ) then
 
             -- Get the group member
-            local i = GetGroupIndexByUnitTag(unitTag)
+            local groupUnitTag
+            local isCompanion
+            if (IsGroupCompanionUnitTag(unitTag)) then
+                groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+                isCompanion = true
+            else
+                groupUnitTag = unitTag
+                isCompanion = false
+            end
+            local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+            if (isCompanion) then
+                i = i + GetGroupSize()
+            end
 
             -- Small group
-            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+            if ( FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then 
                 enabled = true
                 frame   = _G["FTC_GroupFrame" .. i]
 
@@ -797,16 +908,40 @@
         end
 
         -- Group frames
-        if ( IsUnitGrouped('player') ) then
+		local hasLocalCompanion = HasActiveCompanion() or HasPendingCompanion()
+		local hasLocalCompanionOnly = hasLocalCompanion and FTC.Group.members == 0
+		local inGroup = IsUnitGrouped('player')
+        if ( IsUnitGrouped('player') or hasLocalCompanion ) then
             local context   = nil
-            if (  GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then context = "Group"
+            if (  FTC.Group.members <= 4 and FTC.Vars.GroupFrames ) then context = "Group"
             elseif ( FTC.Vars.RaidFrames ) then context = "Raid"
             else return end
 
             -- Update attributes out of combat
-            for i = 1 , GetGroupSize() do
-                if ( not IsUnitInCombat('player') ) then FTC.Player:UpdateAttribute( GetGroupUnitTagByIndex(i),POWERTYPE_HEALTH,nil,nil,nil ) end
-                FTC.Frames:GroupRange( 'group'..i , nil )
+            local max = FTC.Group.members
+		    if ( hasLocalCompanionOnly ) then
+			    max = FTC.Vars.GroupHidePlayer and 1 or 2
+            end
+            for i = 1 , max do
+                if ( not IsUnitInCombat('player') ) then 
+					local unitTag = GetGroupUnitTagByIndex(i)
+					if ( hasLocalCompanionOnly ) then
+						if ( FTC.Vars.GroupHidePlayer ) then
+							unitTag = "companion"
+						else
+							unitTag = i == 1 and "player" or "companion"
+						end
+					end
+
+					local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)					
+					if companionTag then
+						unitTag = companionTag
+					end
+
+					FTC.Player:UpdateAttribute( unitTag,POWERTYPE_HEALTH,nil,nil,nil )
+				end
+
+                FTC.Frames:GroupRange( unitTag , nil )
             end
         end
     end

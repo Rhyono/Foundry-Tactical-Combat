@@ -134,6 +134,54 @@ function FTC.Group:Initialize()
     FTC.Group.members = 0
 end
 
+function FTC.Group:HasLocalCompanion()
+    return HasActiveCompanion() or HasPendingCompanion()
+end
+
+function FTC.Group:IsLocalGroup()
+    return HasLocalCompanion() and FTC.Group.members == 0
+end
+
+function FTC.Group:GetIndexByUnitTag( unitTag )
+    -- Fake group order if it's just player and companion
+    if ( FTC.Group:IsLocalGroup() ) then
+        if ( unitTag == "player" ) then
+            return FTC.Vars.GroupHidePlayer and nil or 1
+        elseif ( unitTag == "companion" ) then
+            return FTC.Vars.GroupHidePlayer and 1 or 2
+        else
+            return nil
+        end
+    end
+    local groupUnitTag
+    local isCompanion
+    -- Is this a companion? then get its group tag (group2companion -> group2)
+    if (IsGroupCompanionUnitTag(unitTag)) then
+        groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+        isCompanion = true
+    else
+        groupUnitTag = unitTag
+        isCompanion = false
+    end
+
+    -- Now that we have 
+    local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+    -- Companions are all listed at the end for ordering alignment
+    if (isCompanion) then
+        i = i + GetGroupSize()
+    end
+    return i
+end
+
+function FTC.Group:GetGroupIndexByUnitIndex(unitIndex)
+    local groupSize = GetGroupSize()
+    if ( not FTC.Group:IsLocalGroup() and unitIndex > groupSize ) then
+        return unitIndex - groupSize
+    end
+end
+
+
 
 --[[----------------------------------------------------------
     EVENT HANDLERS
@@ -151,23 +199,49 @@ end
 
         -- Player
         local data = nil
+
+        local hasLocalCompanion = HasActiveCompanion() or HasPendingCompanion()
+        local hasLocalCompanionOnly = hasLocalCompanion and FTC.Group.members == 0
+
 		if ( unitTag == nil ) then
 			return
 		
         elseif ( unitTag == 'player' ) then
             data    = FTC.Player
+            unitTag = 'player'
         
         -- Target
         elseif ( unitTag == 'reticleover' ) then
             data    = FTC.Target
 
         -- Group
-        elseif ( string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion"))) then
-            local i = GetGroupIndexByUnitTag(unitTag)
+        elseif ( string.sub(unitTag, 0, 5) == "group" ) then
+            local groupUnitTag
+            local isCompanion
+            if (IsGroupCompanionUnitTag(unitTag)) then
+                groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+                isCompanion = true
+            else
+                groupUnitTag = unitTag
+                isCompanion = false
+            end
+            local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+            if (isCompanion) then
+                i = i + GetGroupSize()
+            end
+
             data    = FTC.Group[i]
 
-        -- Otherwise bail out
-        else return end
+        -- Check for companion
+        else
+            if ( hasLocalCompanionOnly ) then
+                local i = FTC.Vars.GroupHidePlayer and 1 or 2
+                data    = FTC.Group[i]
+            else
+                return
+            end
+        end
         
         -- Translate the attribute
         local attrs = { [POWERTYPE_HEALTH] = "health", [POWERTYPE_MAGICKA] = "magicka", [POWERTYPE_STAMINA] = "stamina" }
@@ -182,7 +256,12 @@ end
         local pct = math.max(zo_roundToNearest((powerValue or 0)/powerMax,0.01),0)
         
         -- Update frames
-        if ( FTC.init.Frames ) then FTC.Frames:Attribute( unitTag , power , powerValue , powerMax , pct , data.shield.current ) end
+        if ( FTC.init.Frames ) then 
+            FTC.Frames:Attribute( unitTag , power , powerValue , powerMax , pct , data.shield.current )
+            if ( hasLocalCompanionOnly and unitTag == "player" and not FTC.Vars.GroupHidePlayer and powerType == POWERTYPE_HEALTH ) then
+                FTC.Frames:Attribute( "group1" , power , powerValue , powerMax , pct , data.shield.current )
+            end
+        end
         
         -- Update the database object
         data[power] = { ["current"] = powerValue , ["max"] = powerMax , ["pct"] = pct }
@@ -210,12 +289,32 @@ end
             data    = FTC.Target
 
         -- Group
-        elseif ( string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion")) and ( ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) or FTC.Vars.RaidFrames ) ) then
-            local i = GetGroupIndexByUnitTag(unitTag)
+        elseif ( string.sub(unitTag, 0, 5) == "group" and ( ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) or FTC.Vars.RaidFrames ) ) then
+            local groupUnitTag
+            local isCompanion
+            if (IsGroupCompanionUnitTag(unitTag)) then
+                groupUnitTag = GetGroupUnitTagByCompanionUnitTag(unitTag)
+                isCompanion = true
+            else
+                groupUnitTag = unitTag
+                isCompanion = false
+            end
+            local i = GetGroupIndexByUnitTag(groupUnitTag)
+
+            if (isCompanion) then
+                i = i + GetGroupSize()
+            end
             data    = FTC.Group[i]
 
-        -- Otherwise bail out
-        else return end
+        -- Check for companion
+        else
+            if ( hasLocalCompanionOnly ) then
+                local i = FTC.Vars.GroupHidePlayer and 1 or 2
+                data    = FTC.Group[i]
+            else
+                return
+            end
+        end
 
         -- If no value was passed, get new data
         if ( value == nil ) then 
@@ -226,7 +325,12 @@ end
         local pct = zo_roundToNearest(value/data["health"]["max"],0.01)
         
         -- Update frames
-        if ( FTC.init.Frames ) then FTC.Frames:Shield( unitTag , value , pct , data.health.current , data.health.max , data.health.pct ) end
+        if ( FTC.init.Frames ) then 
+            FTC.Frames:Shield( unitTag , value , pct , data.health.current , data.health.max , data.health.pct )
+            if ( hasLocalCompanionOnly and unitTag == "player" and not FTC.Vars.GroupHidePlayer ) then
+                FTC.Frames:Shield( "group1" , value , pct , data.health.current , data.health.max , data.health.pct )
+            end
+        end
         
         -- Update the database object
         data.shield = { ["current"] = value , ["max"] = maxValue , ["pct"] = pct }

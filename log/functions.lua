@@ -32,7 +32,9 @@
 		if FCL == nil then
 			FCL = FTC.LMW:CreateMsgWindow("FTC_CombatLog", GetString(FTC_CL_Label) , nil , nil )
 			FCL:SetDimensions(FTC.Vars.LogWidth,FTC.Vars.LogHeight)
-			FCL:SetParent(FTC_UI)
+			-- fix for High Isle GuiRoot startup error
+			--FCL:SetParent(FTC_UI)
+			FCL:SetParent(GuiRoot)
 			FCL:ClearAnchors()
 			FCL:SetAnchor(unpack(FTC.Vars.FTC_CombatLog))
 			FCL:SetClampedToScreen(false)

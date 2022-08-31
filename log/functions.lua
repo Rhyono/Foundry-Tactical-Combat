@@ -62,11 +62,24 @@
 				end
 			end, 200)
 
-			ZO_PreHook(chatSystem, "Minimize", function() FTC.Log:SetupChat( false ) end)
-			ZO_PreHook(chatSystem, "Maximize", function() FTC.Log:SetupChat( true ) end)
+			-- Mod High Isle non-alternating combat log 29-08-22
+			-- Only hook to chat if alternating with chat
+			if FTC.Vars.AlternateChat then
+				ZO_PreHook(chatSystem, "Minimize", function() FTC.Log:SetupChat( false ) end)
+				ZO_PreHook(chatSystem, "Maximize", function() FTC.Log:SetupChat( true ) end)
+			end
+			--End mod
 			
 			isPreHooked = true
 		end)
+		
+		-- Mod High Isle non-alternating combat log 29-08-22
+		-- If not alternating with chat then enable
+        if (not FTC.Vars.AlternateChat) then FTC_CombatLog:SetHidden(false) end
+		
+		-- Indicate toggle to display (irrelevant when alternating with chat)
+		FTC.init.toggleHide = false
+		-- End mod
 		
 		-- Save initialization status
 		if not FTC.init.Log then
@@ -103,13 +116,56 @@
 		-- Bail if the log is disabled
 		if ( not FTC.Vars.EnableLog ) then return end
 
-		-- Toggle alternating with chat
-		if FTC_CombatLog:IsHidden() then
-			FTC.Log:SetupChat( false )
+		-- Mod High Isle non-alternating combat log 29-08-22
+		-- Manage the toggle for chat alternating and non-chat alternating
+		if FTC.Vars.AlternateChat then
+			-- Toggle alternating with chat
+			if FTC_CombatLog:IsHidden() then
+				FTC.Log:SetupChat( false )
+			else
+				FTC.Log:SetupChat( true )
+			end
 		else
-			FTC.Log:SetupChat( true )
+			if FTC_CombatLog:IsHidden() then
+				-- Was hidden, so reveal
+				FTC_CombatLog:SetHidden(false)
+				FTC.init.toggleHide = false
+			else
+				-- Was visible, so hide
+				FTC_CombatLog:SetHidden(true)
+				FTC.init.toggleHide = true
+			end
 		end
+		--End mod
 	end
+
+	-- Mod High Isle non-alternating combat log 29-08-22
+	--[[ 
+	 * Switch Combat Log visibility on layer change.
+	 * --------------------------------
+	 * Called by FTC.OnLayerChange()
+	 * --------------------------------
+	 ]]--
+	function FTC.Log:ToggleLayer(hide)
+
+		-- Consider change based on request and current toggle state
+		if hide then
+			-- Request to hide - do nothing if already hidden
+			if (FTC_CombatLog:IsHidden()) then return end
+			-- Otherwise hide
+			FTC_CombatLog:SetHidden(true)
+		else
+			-- Request to make visible - do nothing if already visible
+			if (not FTC_CombatLog:IsHidden()) then return end
+			-- Otherwise only allow if previously toggled to visible
+			if (not FTC.init.toggleHide) then 
+				FTC_CombatLog:SetHidden(false) 
+			end
+		end
+
+	end
+	--End mod
+	
 
 	--[[ 
 	 * Print Message to Log

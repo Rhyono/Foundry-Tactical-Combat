@@ -24,7 +24,7 @@
 
 		-- Target Events
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_RETICLE_TARGET_CHANGED		, FTC.OnTargetChanged )
-			
+				
 		-- Attribute Events
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_POWER_UPDATE					, FTC.OnPowerUpdate )
 		EVENT_MANAGER:RegisterForEvent( "FTC" , EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED	, FTC.OnVisualAdded ) 
@@ -86,6 +86,21 @@
 	 ]]--
 	function FTC.OnLayerChange( eventCode, layerIndex, activeLayerIndex )
 		FTC:ToggleVisibility( activeLayerIndex )
+		
+		-- Mod High Isle non-alternating combat log 29-08-22
+		-- Quick get out if not enabled or alternating with chat
+		if ( not FTC.Vars.EnableLog ) then return end
+		if FTC.Vars.AlternateChat then 
+		    return 
+		else		
+			-- If not alternating combat log with chat then toggle
+			if (activeLayerIndex > 2) then
+				FTC.Log:ToggleLayer(true) 
+			else
+				FTC.Log:ToggleLayer(false) 
+			end
+		end
+		-- End mod
 	end
 
 	--[[ 

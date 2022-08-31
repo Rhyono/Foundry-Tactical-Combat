@@ -18,8 +18,8 @@
     Author:   		Atropos / Philgo68 / Demiknight (Dark Brotherhood) / Rhyono (Homestead/Morrowind/HotR/CC/Dragon Bones/Summerset/Wolfhunter/Murkmire/Wrathstone/Elsweyr/Scalebreaker/Dragonhold/Harrowstorm/Greymoor/Stonethorn/Markarth/FoA/Blackwood/Walking Flame/Deadlands)
 	Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls
     Email:    		atropos@tamrielfoundry.com
-    Version:  		1.21
-    Updated:  		2022-06-07
+    Version:  		1.22
+    Updated:  		2022-08-31
   ]]--
 
 --[[----------------------------------------------------------
@@ -30,7 +30,7 @@
 FTC                     = {}
 FTC.name                = "FoundryTacticalCombat"
 FTC.tag                 = "FTC"
-FTC.version             = 1.21
+FTC.version             = 1.22
 FTC.settings            = 0.60
 FTC.language            = GetCVar("language.2")
 FTC.UI                  = WINDOW_MANAGER:CreateTopLevelWindow( "FTC_UI" )

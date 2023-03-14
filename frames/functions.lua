@@ -431,7 +431,7 @@
             enabled = FTC.Vars.TargetFrame
 
         -- Group Frames
-        elseif ( string.sub(unitTag, 0, 5) == "group" ) then
+        elseif ( type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" ) then
 
             -- Get the group member
             local i = GetGroupIndexByUnitTag(unitTag)

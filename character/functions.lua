@@ -162,7 +162,7 @@ end
             data    = FTC.Target
 
         -- Group
-        elseif ( string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion"))) then
+        elseif (  type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion"))) then
             local i = GetGroupIndexByUnitTag(unitTag)
             data    = FTC.Group[i]
 
@@ -210,7 +210,7 @@ end
             data    = FTC.Target
 
         -- Group
-        elseif ( string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion")) and ( ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) or FTC.Vars.RaidFrames ) ) then
+        elseif (  type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion")) and ( ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) or FTC.Vars.RaidFrames ) ) then
             local i = GetGroupIndexByUnitTag(unitTag)
             data    = FTC.Group[i]
 

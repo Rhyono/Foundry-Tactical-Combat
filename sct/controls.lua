@@ -102,8 +102,8 @@
 	   
 
 	   -- Apply some options
-	   control.value:SetResizeToFitDescendents(true)
-	   control.name:SetResizeToFitDescendents(true)
+	   --control.value:SetResizeToFitDescendents(true)
+	   --control.name:SetResizeToFitDescendents(true)
 
 	    -- Return buff to pool
 	    return control
@@ -131,8 +131,8 @@
 	    control.frame   = FTC.UI:Texture(  "FTC_SCTIn"..counter.."_Frame",  control,   	{size-4,size-4},    {CENTER,CENTER,0,0,control.icon}, 	'/esoui/art/actionbar/icon_metal04.dds', false )
 	   
 	   -- Apply some options
-	   control.value:SetResizeToFitDescendents(true)
-	   control.name:SetResizeToFitDescendents(true)
+	   --control.value:SetResizeToFitDescendents(true)
+	   --control.name:SetResizeToFitDescendents(true)
 
 	    -- Return buff to pool
 	    return control

@@ -296,7 +296,7 @@ end
      ]]-- 
     function FTC.Player:GetClass(classId)
 		--START
-		local arr = {"Dragonknight", "Scorcerer", "Nightblade", "Warden", "Necromancer", "Templar"}
+		local arr = {"Dragonknight", "Sorcerer", "Nightblade", "Warden", "Necromancer", "Templar", [117]="Arcanist"}
 		return arr[classId]
 		--END
         --if ( classId == 1 ) then return "Dragonknight"

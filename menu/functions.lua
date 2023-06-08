@@ -4,9 +4,9 @@
   ]]----------------------------------------------------------
     local FTC = FTC
     FTC.Menu = {}
-    LAM2     = LibAddonMenu2     
+    LAM2     = LibAddonMenu2
 
-    --[[ 
+    --[[
      * Initialize Menu Component
      * --------------------------------
      * Called by FTC:Initialize()
@@ -15,12 +15,12 @@
     function FTC.Menu:Initialize()
 
         -- Configure the master panel
-        FTC.Menu.panel = { 
-            type                = "panel", 
-            name                = FTC.tag, 
+        FTC.Menu.panel = {
+            type                = "panel",
+            name                = FTC.tag,
             displayName         = GetString(FTC_ShortInfo),
-            author              = "Atropos", 
-            version             = FTC.version, 
+            author              = "Atropos",
+            version             = FTC.version,
             registerForRefresh  = true,
             registerForDefaults = false,
         }
@@ -47,7 +47,7 @@
 
     end
 
-    --[[ 
+    --[[
      * Reposition Elements During Menu
      * --------------------------------
      * Called by callback LAM-RefreshPanel
@@ -57,7 +57,7 @@
         if control ~= nil and control.data ~= nil and control.data.name ~= FTC.tag then return end
 
         -- Unit Frames Display
-        if ( FTC.init.Frames and FTC.Vars.PlayerFrame ) then 
+        if ( FTC.init.Frames and FTC.Vars.PlayerFrame ) then
 
             -- Show the player frame
             FTC_PlayerFrame:ClearAnchors()
@@ -69,7 +69,7 @@
         end
 
         -- Buff Tracking Display
-        if ( FTC.init.Buffs ) then 
+        if ( FTC.init.Buffs ) then
 
             -- Move buffs
             local offsetY = ( FTC.Vars.FrameHeight ~= nil ) and ( FTC.Vars.FrameHeight / 2 ) + 6 or 106
@@ -91,17 +91,17 @@
         end
 
         -- Combat Log Display
-        if ( FTC.init.Log ) then 
-            FTC_CombatLog:SetHidden(true) 
+        if ( FTC.init.Log ) then
+            FTC_CombatLog:SetHidden(true)
         end
 
         -- Show the UI layer
         FTC.UI:SetHidden(false)
         FTC.inMenu = true
     end
-            
 
-    --[[ 
+
+    --[[
      * Restore Elements Outside of Menu
      * --------------------------------
      * Called by callback LAM-RefreshPanel
@@ -112,7 +112,7 @@
 		if control ~= nil and control.data ~= nil and control.data.name ~= FTC.tag then return end
 
         -- Unit Frames Display
-        if ( FTC.init.Frames and FTC.Vars.PlayerFrame ) then 
+        if ( FTC.init.Frames and FTC.Vars.PlayerFrame ) then
 
             -- Reset the player frame
             FTC_PlayerFrame:ClearAnchors()
@@ -120,12 +120,12 @@
             FTC_PlayerFrame:SetAnchor(anchor[1],FTC_UI,anchor[2],anchor[3],anchor[4])
 
             -- Restore the correct shield
-            local value, maxValue = GetUnitAttributeVisualizerEffectInfo('player',ATTRIBUTE_VISUAL_POWER_SHIELDING,STAT_MITIGATION,ATTRIBUTE_HEALTH,POWERTYPE_HEALTH)
+            local value, maxValue = GetUnitAttributeVisualizerEffectInfo('player', ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
             FTC.Player:UpdateShield( 'player', value or 0 , maxValue or 0)
         end
 
         -- Buff Tracking Display
-        if ( FTC.init.Buffs ) then 
+        if ( FTC.init.Buffs ) then
 
             -- Move buffs
             FTC_PlayerBuffs:ClearAnchors()
@@ -160,7 +160,7 @@
         FTC.inMenu = false
     end
 
-    --[[ 
+    --[[
      * Update Saved Variable
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -169,12 +169,12 @@
     function FTC.Menu:Update( setting , value , reload )
         -- Update the database
         FTC.Vars[setting] = value
-        
+
         -- Maybe reload -- @Scootworks: Not needed anymore, because we are using requiresReload in LAM
         -- if reload then ReloadUI() end
     end
 
-    --[[ 
+    --[[
      * Reset Settings to Default
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -185,35 +185,35 @@
         -- Reset everything
         if ( context == nil ) then
             for var , value in pairs( FTC.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
             ReloadUI()
 
         -- Reset unit frames
         elseif ( context == "Frames" ) then
             for var , value in pairs( FTC.Frames.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
             FTC.Menu:UpdateFrames()
 
         -- Reset buff tracking
         elseif ( context == "Buffs" ) then
             for var , value in pairs( FTC.Buffs.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
             FTC.Menu:UpdateBuffs()
 
         -- Reset combat log
         elseif ( context == "Log" ) then
             for var , value in pairs( FTC.Log.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
-            FTC.Menu:UpdateLog()            
+            FTC.Menu:UpdateLog()
 
         -- Reset combat text
         elseif ( context == "SCT" ) then
             for var , value in pairs( FTC.SCT.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
 
         -- Reset hotbar
@@ -221,7 +221,7 @@
         -- Reset damage statistics
         elseif ( context == "Stats" ) then
              for var , value in pairs( FTC.Stats.Defaults ) do
-                FTC.Vars[var] = value   
+                FTC.Vars[var] = value
             end
             FTC.Menu:UpdateStats()
         end
@@ -232,7 +232,7 @@
      UNIT FRAMES
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Live Update Unit Frames
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -265,7 +265,7 @@
     BUFF TRACKING
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Live Update Buff Tracking
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -288,13 +288,13 @@
         FTC.Buffs:GetBuffs('player')
 
         -- Change fonts for active buffs
-        for _ , buff in pairs(FTC.Buffs.Pool.m_Active) do 
+        for _ , buff in pairs(FTC.Buffs.Pool.m_Active) do
             buff.label = FTC.UI:Label( "FTC_Buff"..buff.id.."_Label", buff, {50,20},  {BOTTOM,BOTTOM,-1,-4}, FTC.UI:Font(FTC.Vars.BuffsFont1,FTC.Vars.BuffsFontSize,true) , {0.8,1,1,1}, {1,1}, nil, false )
             buff.name  = FTC.UI:Label( "FTC_Buff"..buff.id.."_Name",  buff, {450,20}, {LEFT,RIGHT,10,0},     FTC.UI:Font(FTC.Vars.BuffsFont2,FTC.Vars.BuffsFontSize,true) , {1,1,1,1}, {0,1}, "Buff Name", true )
         end
 
         -- Change fonts for free buffs
-        for _ , buff in pairs(FTC.Buffs.Pool.m_Free) do 
+        for _ , buff in pairs(FTC.Buffs.Pool.m_Free) do
             buff.label = FTC.UI:Label( "FTC_Buff"..buff.id.."_Label", buff, {50,20},  {BOTTOM,BOTTOM,-1,-4}, FTC.UI:Font(FTC.Vars.BuffsFont1,FTC.Vars.BuffsFontSize,true) , {0.8,1,1,1}, {1,1}, nil, false )
             buff.name  = FTC.UI:Label( "FTC_Buff"..buff.id.."_Name",  buff, {450,20}, {LEFT,RIGHT,10,0},     FTC.UI:Font(FTC.Vars.BuffsFont2,FTC.Vars.BuffsFontSize,true) , {1,1,1,1}, {0,1}, "Buff Name", true )
         end
@@ -303,7 +303,7 @@
         FTC.Menu:Reposition(FTC_Menu)
     end
 
-    --[[ 
+    --[[
      * Translate Buff Format Into Nicename
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -321,7 +321,7 @@
         elseif ( value == "ralist" )  then return GetString(FTC_BuffFormat6) end
     end
 
-    --[[ 
+    --[[
      * Update Saved Buff Format
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -342,13 +342,13 @@
         FTC.Menu:UpdateBuffs()
     end
 
-    --[[ 
+    --[[
      * Fake Buffs and Debuffs for Examples
      * --------------------------------
      * Called by FTC.Menu:Reposition()
      * --------------------------------
      ]]--
-    function FTC.Menu:FakeBuffs() 
+    function FTC.Menu:FakeBuffs()
 
         -- Get the time
         local time = GetFrameTimeSeconds()
@@ -359,7 +359,7 @@
                 local ability = {
                     ["owner"]   = FTC.Player.name,
                     ["name"]    = GetString(FTC_PlayerBuff) .. " 1",
-                    ["dur"]     = 8, 
+                    ["dur"]     = 8,
                     ["cast"]    = 0,
                     ["debuff"]  = false,
                     ["icon"]    = '/esoui/art/icons/ability_rogue_006.dds',
@@ -373,7 +373,7 @@
                 local ability = {
                     ["owner"]   = FTC.Player.name,
                     ["name"]    = GetString(FTC_PlayerBuff) .. " 2",
-                    ["dur"]     = 12, 
+                    ["dur"]     = 12,
                     ["cast"]    = 0,
                     ["debuff"]  = false,
                     ["icon"]    = '/esoui/art/icons/ability_rogue_048.dds',
@@ -387,7 +387,7 @@
                 local ability = {
                     ["owner"]   = FTC.Player.name,
                     ["name"]    = GetString(FTC_PlayerDebuff) .. " 1",
-                    ["dur"]     = 7, 
+                    ["dur"]     = 7,
                     ["cast"]    = 0,
                     ["debuff"]  = true,
                     ["icon"]    = '/esoui/art/icons/ability_rogue_007.dds',
@@ -401,7 +401,7 @@
                 local ability = {
                     ["owner"]   = FTC.Player.name,
                     ["name"]    = GetString(FTC_PlayerDebuff) .. " 2",
-                    ["dur"]     = 6, 
+                    ["dur"]     = 6,
                     ["cast"]    = 0,
                     ["debuff"]  = true,
                     ["icon"]    = '/esoui/art/icons/ability_rogue_018.dds',
@@ -419,13 +419,13 @@
     COMBAT TEXT
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Fake Scrolling Combat Text
      * --------------------------------
      * Called by FTC.Menu:Reposition()
      * --------------------------------
      ]]--
-    function FTC.Menu:FakeSCT() 
+    function FTC.Menu:FakeSCT()
 
         -- Register a fake SCT damage
         local damage    = {
@@ -439,7 +439,7 @@
             ["crit"]    = false,
             ["heal"]    = false,
             ["icon"]    = '/esoui/art/icons/ability_rogue_007.dds',
-            ["mult"]    = 1, 
+            ["mult"]    = 1,
             ["weapon"]  = false,
         }
         FTC.SCT:Damage(damage)
@@ -456,7 +456,7 @@
             ["crit"]    = true,
             ["heal"]    = true,
             ["icon"]    = '/esoui/art/icons/ability_mage_054.dds',
-            ["mult"]    = 1, 
+            ["mult"]    = 1,
             ["weapon"]  = false,
         }
         FTC.SCT:Damage(heal)
@@ -466,7 +466,7 @@
      COMBAT LOG
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Update Combat Log Size and Position
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -476,7 +476,7 @@
 
         -- Get the log
         local log = FTC_CombatLog
-        
+
         -- Get the new position and dimensions
         local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY = log:GetAnchor()
         local width , height = log:GetDimensions()
@@ -487,7 +487,7 @@
         FTC.Vars.LogHeight = height
     end
 
-    --[[ 
+    --[[
      * Live Combat Log
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -508,7 +508,7 @@
      DAMAGE STATISTICS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Update Statistics
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -529,7 +529,7 @@
      REPOSITION ELEMENTS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Enable Re-Positioning Unit Frames
      * --------------------------------
      * Called by FTC.Menu:Controls()
@@ -538,8 +538,8 @@
     function FTC.Menu:MoveFrames( move )
 
         -- Start by returning to the normal UI
-        if ( SCENE_MANAGER:IsInUIMode() and not WINDOW_MANAGER:IsSecureRenderModeEnabled() ) then 
-            SCENE_MANAGER:SetInUIMode(false) 
+        if ( SCENE_MANAGER:IsInUIMode() and not WINDOW_MANAGER:IsSecureRenderModeEnabled() ) then
+            SCENE_MANAGER:SetInUIMode(false)
         end
 
         -- Move elements back to their normal positions
@@ -547,7 +547,7 @@
             FTC.inMenu = false
             FTC.Menu:Restore()
         end
-        
+
         -- Unit Frames
         if ( FTC.init.Frames ) then
             local frames = { FTC_PlayerFrame , FTC_TargetFrame , FTC_GroupFrame , FTC_RaidFrame }
@@ -560,13 +560,13 @@
             end
 
             -- If we are done moving, make sure frame visibility is correct
-            if ( not move ) then 
+            if ( not move ) then
                 FTC.Frames:SetupPlayer()
                 FTC_TargetFrame:SetHidden(true)
                 FTC.Frames:SetupGroup()
             end
         end
-        
+
         -- Buff Tracking
         if ( FTC.init.Buffs ) then
             local frames = { FTC_PlayerBuffs , FTC_PlayerDebuffs , FTC_LongBuffs , FTC_TargetBuffs , FTC_TargetDebuffs }
@@ -578,7 +578,7 @@
                 if ( frame.label ~= nil ) then frame.label:SetHidden(not move) end
             end
         end
-      
+
         -- Display SCT
         if ( FTC.init.SCT ) then
             local frames = { FTC_SCTOut , FTC_SCTIn , FTC_SCTAlerts }
@@ -588,7 +588,7 @@
                 frame:SetAlpha(1)
                 if ( frame.backdrop ~= nil ) then frame.backdrop:SetHidden(not move) end
                 if ( frame.label ~= nil ) then frame.label:SetHidden(not move) end
-            end            
+            end
         end
 
         -- Statistics
@@ -603,14 +603,14 @@
         FTC.move = move
     end
 
-    --[[ 
+    --[[
      * Update Saved Element Position
      * --------------------------------
      * Called by OnMouseUp() on movable elements
      * --------------------------------
      ]]--
     function FTC.Menu:SaveAnchor( control )
-        
+
         -- Get the new position
         local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY = control:GetAnchor()
 

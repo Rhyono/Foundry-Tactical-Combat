@@ -3,8 +3,8 @@
 --[[----------------------------------------------------------
 	SCT ALERTS COMPONENT
  ]]-----------------------------------------------------------
-  
-    --[[ 
+
+    --[[
      * Process New Alert Notifications
      * --------------------------------
      * Called by FTC.SCT:ResourceAlert()
@@ -14,9 +14,9 @@
 
 		-- Bail if alerts are disabled
 		if ( not FTC.Vars.SCTAlerts ) then return end
-		
+
 		-- Get the existing statuses
-		local name   = newAlert.name	
+		local name   = newAlert.name
 		local ms 	 = GetGameTimeMilliseconds()
 
 		-- Check if there is an existing alert
@@ -33,7 +33,7 @@
 
         -- Compute starting offsets
         local  offsets = {}
-        if     ( FTC.SCT.countAlert == 1 )   then offsets = {0,-50} 
+        if     ( FTC.SCT.countAlert == 1 )   then offsets = {0,-50}
         elseif ( FTC.SCT.countAlert == 2 )   then offsets = {50,0}
         elseif ( FTC.SCT.countAlert == 3 )   then offsets = {0,50}
         elseif ( FTC.SCT.countAlert == 4 )   then offsets = {-50,0} end
@@ -61,7 +61,7 @@
         control:SetAlpha(0)
 
 		-- Insert the alert into the table
-		table.insert( FTC.SCT.Alerts , alert ) 
+		table.insert( FTC.SCT.Alerts , alert )
 
         -- Start fade animation
         FTC.SCT:Fade(control)
@@ -71,28 +71,28 @@
 	EVENT HANDLERS
  ]]-----------------------------------------------------------
 
-	--[[ 
+	--[[
 	* Generate New Resource Alert
 	* --------------------------------
 	* Called by FTC.OnPowerUpdate()
 	* --------------------------------
 	]]--
 	function FTC.SCT:ResourceAlert( unitTag , powerType , powerValue , powerMax )
-		
+
 		-- Get the attribute name and color
 		local Alerts = {
-			[POWERTYPE_HEALTH] 	= {
+			[COMBAT_MECHANIC_FLAGS_HEALTH] 	= {
 				["attr"]	 	= "health",
 				["label"]		= GetString(FTC_LowHealth),
 				["color"] 		= ( FTC.init.Frames ) and FTC.Vars.FrameHealthColor or {133/255,018/255,013/255},
 
 			},
-			[POWERTYPE_MAGICKA] = {
+			[COMBAT_MECHANIC_FLAGS_MAGICKA] = {
 				["attr"]	 	= "magicka",
 				["label"]		= GetString(FTC_LowMagicka),
 				["color"]	 	= ( FTC.init.Frames ) and FTC.Vars.FrameMagickaColor or {064/255,064/255,128/255},
 			},
-			[POWERTYPE_STAMINA] = {
+			[COMBAT_MECHANIC_FLAGS_STAMINA] = {
 				["attr"]	 	= "stamina",
 				["label"]		= GetString(FTC_LowStamina),
 				["color"] 		= ( FTC.init.Frames ) and FTC.Vars.FrameStaminaColor or {038/255,077/255,033/255},
@@ -104,10 +104,10 @@
 
 		-- Get the prior attribute level
 		local prior 	= FTC.Player[Alerts[powerType].attr].pct * 100
-		
+
 		-- Bail if we're above the threshold or were already below
 		if ( pct > 25 or prior <= 25 ) then return end
-		
+
 		-- Submit an object
 		local newAlert = {
 			["name"]	= "low"..Alerts[powerType].attr,
@@ -116,19 +116,19 @@
 			["size"]	= FTC.Vars.SCTFontSize + 8,
 			["buffer"]	= 5000,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 	end
 
-	--[[ 
+	--[[
 	* Generate New Experience Alert
 	* --------------------------------
 	* Called by FTC.OnXPUpdate()
 	* --------------------------------
 	]]--
 	function FTC.SCT:NewExp( currentExp , maxExp , reason )
-		
+
 		-- Experience gains for low level players
 		local current = ( FTC.Player.level < 50 ) and currentExp or GetPlayerChampionXP()
 		local max	  = ( FTC.Player.level < 50 ) and maxExp or GetNumChampionXPInChampionPoint(FTC.Player.clevel)
@@ -146,12 +146,12 @@
 			["size"]	= FTC.Vars.SCTFontSize,
 			["buffer"]	= 0,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 	end
 
-	--[[ 
+	--[[
 	* Generate New Crowd Control Alert
 	* --------------------------------
 	* Called by FTC.OnPowerUpdate()
@@ -175,7 +175,7 @@
 
 		-- Crowd control effects
 		else
-		
+
 			-- Determine result
 			local CC = {
 				[ACTION_RESULT_INTERRUPT]	= {
@@ -224,23 +224,23 @@
 		end
 	end
 
-	--[[ 
+	--[[
 	* Generate New Alliance Point
 	* --------------------------------
 	* Called by FTC.OnAPUpdate()
 	* --------------------------------
 	]]--
 	function FTC.SCT:NewAP( eventCode, alliancePoints, playSound, difference )
-		
+
 	-- Save tiny AP rewards for later
-	if ( difference > 0 and difference <= 5 ) then 
+	if ( difference > 0 and difference <= 5 ) then
 		FTC.SCT.backAP = FTC.SCT.backAP + difference
 		return
 	end
-	
+
 	-- Get AvA progress
 	local subStart, nextSub, rankStart, nextRank = GetAvARankProgress( alliancePoints )
-	
+
 	-- Calculate percentage to level
 	local pct	= zo_roundToNearest( ( alliancePoints - rankStart ) / ( nextRank - rankStart ) , 0.01 ) * 100
 
@@ -255,7 +255,7 @@
 			["size"]	= FTC.Vars.SCTFontSize,
 			["buffer"]	= 0,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 
@@ -263,7 +263,7 @@
 		FTC.SCT.backAP = 0
 	end
 
-	--[[ 
+	--[[
 	* Generate Potion Availability Alert
 	* --------------------------------
 	* Called by FTC.OnUpdateCooldowns()
@@ -288,7 +288,7 @@
 			["size"]	= FTC.Vars.SCTFontSize+8,
 			["buffer"]	= 0,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 
@@ -296,7 +296,7 @@
 		FTC.Player.canPotion = canUse
 	end
 
-	--[[ 
+	--[[
 	* Generate Ultimate Availability Alert
 	* --------------------------------
 	* Called by FTC.OnPowerUpdate()
@@ -312,12 +312,12 @@
 			["size"]	= FTC.Vars.SCTFontSize+8,
 			["buffer"]	= 0,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 	end
 
-	--[[ 
+	--[[
 	* Generate Combat State Alert
 	* --------------------------------
 	* Called by FTC.OnPowerUpdate()
@@ -333,12 +333,12 @@
 			["size"]	= FTC.Vars.SCTFontSize,
 			["buffer"]	= 1000,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 	end
 
-	--[[ 
+	--[[
 	* Generate Cleanse Now Alert
 	* --------------------------------
 	* Called by FTC.OnPowerUpdate()
@@ -354,7 +354,7 @@
 			["size"]	= FTC.Vars.SCTFontSize+8,
 			["buffer"]	= 5000,
 		}
-		
+
 		-- Submit the new status
 		FTC.SCT:NewAlert( newAlert )
 	end
@@ -363,8 +363,8 @@
 --[[----------------------------------------------------------
 	UPDATING FUNCTIONS
  ]]-----------------------------------------------------------
- 
-	--[[ 
+
+	--[[
 	* Update SCT Alerts
 	* --------------------------------
 	* Called by FTC.SCT:Initialize()
@@ -378,17 +378,17 @@
 
 		-- Bail if no statuses is present
 		if ( #Alerts == 0 ) then return end
-		
+
 		-- Get the game time
 		local ms = GetGameTimeMilliseconds()
-		
+
         -- Traverse alerts table back-to-front
         for i = #Alerts,1,-1 do
 
             -- Get the control
             local alert		= Alerts[i]
             local control   = alert.control
-			
+
             -- Compute the animation duration ( speed = 10 -> 1.5 seconds, speed = 1 -> 6 seconds )
             local lifespan  = ( ms - alert.ms ) / 1000
             local speed     = ( ( 11 - FTC.Vars.SCTSpeed ) / 2 ) + 1
@@ -396,16 +396,16 @@
 
             -- Purge expired alerts
             if ( lifespan > speed ) then
-                table.remove(FTC.SCT.Alerts,i) 
+                table.remove(FTC.SCT.Alerts,i)
                 FTC.SCT.AlertPool:ReleaseObject(control.id)
-				
+
             -- Otherwise go ahead
-            else 
+            else
 
                 -- Get the starting offsets
                 local height    = parent:GetHeight()
                 local width     = parent:GetWidth()
-                local offsetX   = control.offsetX           
+                local offsetX   = control.offsetX
                 local offsetY   = control.offsetY + ( -1 * height ) * remaining
 
                 -- Adjust the position

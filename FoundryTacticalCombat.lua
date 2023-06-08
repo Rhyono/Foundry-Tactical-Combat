@@ -2,7 +2,7 @@
 --[[----------------------------------------------------------
     FOUNDRY TACTICAL COMBAT
     ----------------------------------------------------------
-    FTC is a user interface overhaul designed the replace the Elder Scrolls Online 
+    FTC is a user interface overhaul designed the replace the Elder Scrolls Online
     interface and provide useful and time-sensitive information about combat events
     allowing players to better respond and react to evolving game situations.
 
@@ -16,9 +16,9 @@
     (7) Group Frames
 
     Author:   		Atropos / Philgo68 / Demiknight (Dark Brotherhood) / Rhyono (Homestead/Morrowind/HotR/CC/Dragon Bones/Summerset/Wolfhunter/Murkmire/Wrathstone/Elsweyr/Scalebreaker/Dragonhold/Harrowstorm/Greymoor/Stonethorn/Markarth/FoA/Blackwood/Walking Flame/Deadlands)
-	  Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls / fugue / hypatian
+	  Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls / fugue / hypatian / Sharlikran
     Email:    		atropos@tamrielfoundry.com
-    Version:  		1.24
+    Version:  		1.25
     Updated:  		2023-06-06
   ]]--
 
@@ -30,7 +30,7 @@
 FTC                     = {}
 FTC.name                = "FoundryTacticalCombat"
 FTC.tag                 = "FTC"
-FTC.version             = 1.24
+FTC.version             = 1.25
 FTC.settings            = 0.60
 FTC.language            = GetCVar("language.2")
 FTC.UI                  = WINDOW_MANAGER:CreateTopLevelWindow( "FTC_UI" )
@@ -55,12 +55,12 @@ FTC.inMenu              = false
 FTC.inWelcome           = false
 FTC.move                = false
 
---[[ 
+--[[
  * Master Initialization Function
  * --------------------------------
  * Triggered by EVENT_ADD_ON_LOADED
  * --------------------------------
- ]]-- 
+ ]]--
 function FTC.Initialize( eventCode, addOnName )
 
     -- Only set up for FTC
@@ -68,7 +68,7 @@ function FTC.Initialize( eventCode, addOnName )
 
     -- Unregister setup event
     EVENT_MANAGER:UnregisterForEvent( "FTC" , EVENT_ADD_ON_LOADED )
-    
+
     -- Load Saved Variables
     FTC.Vars = ZO_SavedVars:NewAccountWide( 'FTC_VARS' , (FTC.settings*100) , nil , FTC.Defaults )
 
@@ -77,7 +77,7 @@ function FTC.Initialize( eventCode, addOnName )
 
     -- Initialize UI Layer
     FTC.UI:Initialize()
-    
+
     -- Setup Character Management
     FTC.Player:Initialize()
     FTC.Target:Initialize()
@@ -88,7 +88,7 @@ function FTC.Initialize( eventCode, addOnName )
 
     -- Unit Frames Component
     if ( FTC.Vars.EnableFrames )    then FTC.Frames:Initialize() end
-    
+
     -- Active Buffs Component
     if ( FTC.Vars.EnableBuffs )     then FTC.Buffs:Initialize() end
 
@@ -100,20 +100,20 @@ function FTC.Initialize( eventCode, addOnName )
 
     -- Advanced Hotbar Component
     if ( FTC.Vars.EnableHotbar )    then FTC.Hotbar:Initialize() end
-    
+
     -- Combat Statistics
     if ( FTC.Vars.EnableStats )     then FTC.Stats:Initialize() end
-    
+
     -- Menu Component
     FTC.Menu:Initialize()
-    
+
     -- Register Event Handlers
     FTC:RegisterEvents()
-    
+
     -- Register Slash Command
     SLASH_COMMANDS["/"..FTC.tag] = FTC.Slash
     SLASH_COMMANDS["/"..string.lower(FTC.tag)] = FTC.Slash
-    
+
     -- Fire Setup Callback
     CALLBACK_MANAGER:FireCallbacks("FTC_Ready")
 end

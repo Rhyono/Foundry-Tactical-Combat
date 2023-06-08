@@ -22,14 +22,14 @@
         ["regenSm"]     = 'FoundryTacticalCombat/lib/textures/regen_sm.dds',
     }
 
-    --[[ 
+    --[[
      * Initialize FTC UI Layer
      * --------------------------------
      * Called by FTC:Initialize()
      * --------------------------------
-     ]]-- 
+     ]]--
     function FTC.UI:Initialize()
-        
+
         -- Create core controls
         FTC.UI:Controls()
 
@@ -49,12 +49,12 @@
     FONTS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Translate between font name and tag
      * --------------------------------
      * Called by FTC.Menu:Controls()
      * --------------------------------
-     ]]-- 
+     ]]--
     function FTC.UI:TranslateFont( font )
 
         -- Maintain a translation between tags and names
@@ -76,17 +76,17 @@
         end
     end
 
-    --[[ 
+    --[[
      * Retrieve requested font, size, and style
      * --------------------------------
      * Called at control creation
      * --------------------------------
-     ]]-- 
+     ]]--
     function FTC.UI:Font( font , size , shadow)
-        
-        local font = ( FTC.UI.Fonts[font] ~= nil ) and FTC.UI.Fonts[font] or font
-        local size = size or 14
-        local shadow = shadow and '|soft-shadow-thick' or ''
+
+        font = ( FTC.UI.Fonts[font] ~= nil ) and FTC.UI.Fonts[font] or font
+        size = size or 14
+        shadow = shadow and '|soft-shadow-thick' or ''
 
         -- Return font
         return font..'|'..size..shadow
@@ -96,12 +96,12 @@
     ICONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Preload ability icons for all known abilities
      * --------------------------------
      * Called by FTC.UI:Initialize()
      * --------------------------------
-     ]]-- 
+     ]]--
     function FTC:GetAbilityIcons()
 
         -- Iterate over categories, lines, and abilities
@@ -133,7 +133,7 @@
             [11338] = '/esoui/art/icons/death_recap_environmental.dds',             -- Lava
             [5139]  = '/esoui/art/icons/death_recap_environmental.dds',             -- In Lava
             [21132] = '/esoui/art/icons/death_recap_environmental.dds',             -- Intense Cold
-            
+
             -- Defenses
             [2890]  = '/esoui/art/icons/ability_warrior_030.dds',                   -- Block
             [30869] = '/esoui/art/icons/ability_mage_058.dds',                      -- Absorb
@@ -153,7 +153,7 @@
             [38841] = '/esoui/art/icons/ability_dualwield_001.dds',                 -- Rending Slashes Bleed
             [38848] = '/esoui/art/icons/ability_dualwield_001.dds',                 -- Blood Craze Bleed
           --[xxxxx] = ,                                                             -- Blade Cloak
-            
+
             [38401] = '/esoui/art/icons/ability_1handed_003.dds',                   -- Shielded Assault
 
             [28385] = '/esoui/art/icons/ability_restorationstaff_004.dds',          -- Grand Healing
@@ -169,9 +169,9 @@
                                                                                     -- Wall of Elements
             -- Weapon Enchantments
             [3653] =  '/esoui/art/icons/ability_healer_033.dds',                    -- Replenish
-            [5187]  = '/esoui/art/icons/death_recap_poison_melee.dds',              -- Poisoned Weapon   
+            [5187]  = '/esoui/art/icons/death_recap_poison_melee.dds',              -- Poisoned Weapon
             [17895] = '/esoui/art/icons/death_recap_fire_melee.dds',                -- Fiery Weapon
-            [17897] = '/esoui/art/icons/death_recap_cold_melee.dds',                -- Frozen Weapon    
+            [17897] = '/esoui/art/icons/death_recap_cold_melee.dds',                -- Frozen Weapon
             [17899] = '/esoui/art/icons/death_recap_shock_melee.dds',               -- Charged Weapon
             [17904] = '/esoui/art/icons/death_recap_disease_melee.dds',             -- Befouled Weapon
             [28919] = '/esoui/art/icons/ability_healer_031.dds',                    -- Life Drain
@@ -229,7 +229,7 @@
             [60407] = '/esoui/art/icons/ability_warrior_011.dds',                   -- Invigorating Bash
             [61660] = '/esoui/art/icons/ability_healer_003.dds',                    -- Resilient
 
-            -- Synergies 
+            -- Synergies
             [23196] = '/esoui/art/icons/ability_sorcerer_thunder_burst.dds',        -- Conduit
             [18076] = '/esoui/art/icons/ability_mage_001.dds',                      -- Impale
             [25440] = '/esoui/art/icons/ability_rogue_052.dds',                     -- Slip Away
@@ -289,7 +289,7 @@
             ['Minor Wound']                     = '/esoui/art/icons/death_recap_magic_ranged.dds', -- EN
             ]]--
 
-        } 
+        }
         for k,v in pairs(custom) do
             FTC.UI.Textures[GetAbilityName(k)] = v
         end
@@ -301,18 +301,18 @@
     UI CREATION FUNCTIONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Top Level Window
-     ]]-- 
+     ]]--
     function FTC.UI:TopLevelWindow( name , parent , dims , anchor , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
         if ( #dims ~= 2 ) then return end
         if ( #anchor ~= 4 and #anchor ~= 5 ) then return end
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the window
         local window = _G[name]
         if ( window == nil ) then window = WINDOW_MANAGER:CreateTopLevelWindow( name ) end
@@ -327,23 +327,24 @@
         return window
     end
 
-    --[[ 
+    --[[
      * Control
-     ]]-- 
+     ]]--
     function FTC.UI:Control( name , parent , dims , anchor , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
         if ( dims == "inherit" or #dims ~= 2 ) then dims = { parent:GetWidth() , parent:GetHeight() } end
         if ( #anchor ~= 4 and #anchor ~= 5 ) then return end
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the control
         local control = _G[name]
         if ( control == nil ) then control = WINDOW_MANAGER:CreateControl( name , parent , CT_CONTROL ) end
-        
+
         -- Apply properties
+  --[[TODO Why is control shadowed here? ]]--
         local control = FTC.Chain( control )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -353,11 +354,11 @@
         return control
     end
 
-    --[[ 
+    --[[
      * Backdrop
-     ]]-- 
+     ]]--
     function FTC.UI:Backdrop( name , parent , dims , anchor , center , edge , tex , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
@@ -370,8 +371,9 @@
         -- Create the backdrop
         local backdrop = _G[name]
         if ( backdrop == nil ) then backdrop = WINDOW_MANAGER:CreateControl( name , parent , CT_BACKDROP ) end
-        
+
         -- Apply properties
+  --[[TODO Why is backdrop shadowed here? ]]--
         local backdrop = FTC.Chain( backdrop )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -385,9 +387,9 @@
         return backdrop
     end
 
-    --[[ 
+    --[[
      * Label
-     ]]-- 
+     ]]--
     function FTC.UI:Label( name , parent , dims , anchor , font , color , align , text , hidden )
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
@@ -397,12 +399,13 @@
         font    = ( font == nil ) and "ZoFontGame" or font
 		color   = (color ~= nil and #color == 4) and color or {FTC.Vars.FrameFontColor[1],FTC.Vars.FrameFontColor[2],FTC.Vars.FrameFontColor[3],1}
         align   = ( align ~= nil and #align == 2 ) and align or { 1 , 1 }
-        hidden  = ( hidden == nil ) and false or hidden        
+        hidden  = ( hidden == nil ) and false or hidden
         -- Create the label
         local label = _G[name]
         if ( label == nil ) then label = WINDOW_MANAGER:CreateControl( name , parent , CT_LABEL ) end
 
         -- Apply properties
+  --[[TODO Why is label shadowed here? ]]--
         local label = FTC.Chain( label )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -417,11 +420,11 @@
         return label
     end
 
-    --[[ 
+    --[[
      * Status Bar
-     ]]-- 
+     ]]--
     function FTC.UI:Statusbar( name , parent , dims , anchor , color , tex , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
@@ -429,12 +432,13 @@
         if ( #anchor ~= 4 and #anchor ~= 5 ) then return end
         color = ( color ~= nil and #color == 4 ) and color or { 1 , 1 , 1 , 1 }
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the status bar
         local bar = _G[name]
         if ( bar == nil ) then bar = WINDOW_MANAGER:CreateControl( name , parent , CT_STATUSBAR ) end
 
         -- Apply properties
+  --[[TODO Why is bar shadowed here? ]]--
         local bar = FTC.Chain( bar )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -446,11 +450,11 @@
         return bar
     end
 
-    --[[ 
+    --[[
      * Texture
-     ]]-- 
+     ]]--
     function FTC.UI:Texture( name , parent , dims , anchor , tex , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
@@ -458,12 +462,13 @@
         if ( #anchor ~= 4 and #anchor ~= 5 ) then return end
         if ( tex == nil ) then tex = '/esoui/art/icons/icon_missing.dds' end
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the texture
         local texture = _G[name]
         if ( texture == nil ) then texture = WINDOW_MANAGER:CreateControl( name , parent , CT_TEXTURE ) end
 
         -- Apply properties
+  --[[TODO Why is texture shadowed here? ]]--
         local texture = FTC.Chain( texture )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -474,11 +479,11 @@
         return texture
     end
 
-    --[[ 
+    --[[
      * Cooldown
-     ]]-- 
+     ]]--
     function FTC.UI:Cooldown( name , parent , dims , anchor , color , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
@@ -486,12 +491,13 @@
         if ( #anchor ~= 4 and #anchor ~= 5 ) then return end
         color = ( color ~= nil and #color == 4 ) and color or { 1 , 1 , 1 , 1 }
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the texture
         local cooldown = _G[name]
         if ( cooldown == nil ) then cooldown = WINDOW_MANAGER:CreateControl( name , parent , CT_COOLDOWN ) end
 
         -- Apply properties
+  --[[TODO Why is cooldown shadowed here? ]]--
         local cooldown = FTC.Chain( cooldown )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()
@@ -501,11 +507,11 @@
         return cooldown
     end
 
-    --[[ 
+    --[[
      * Button
-     ]]-- 
+     ]]--
     function FTC.UI:Button( name , parent , dims , anchor , state , font , align , normal , pressed , mouseover , hidden )
-        
+
         -- Validate arguments
         if ( name == nil or name == "" ) then return end
         parent = ( parent == nil ) and GuiRoot or parent
@@ -518,12 +524,13 @@
         pressed = ( pressed ~= nil and #pressed == 4 ) and pressed or { 1 , 1 , 1 , 1 }
         mouseover = ( mouseover ~= nil and #mouseover == 4 ) and mouseover or { 1 , 1 , 1 , 1 }
         hidden = ( hidden == nil ) and false or hidden
-        
+
         -- Create the button
         local button = _G[name]
         if ( button == nil ) then button = WINDOW_MANAGER:CreateControl( name , parent , CT_BUTTON ) end
 
         -- Apply properties
+  --[[TODO Why is button shadowed here? ]]--
         local button = FTC.Chain( button )
             :SetDimensions( dims[1] , dims[2] )
             :ClearAnchors()

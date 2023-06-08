@@ -3,7 +3,7 @@
     CORE UI CONTROLS
   ]]----------------------------------------------------------
 
-	--[[ 
+	--[[
 	 * Create Common Controls
 	 * --------------------------------
 	 * Called by FTC.UI:Initialize()
@@ -27,7 +27,7 @@
 		welcome.close:SetNormalTexture('/esoui/art/buttons/closebutton_up.dds')
 		welcome.close:SetMouseOverTexture('/esoui/art/buttons/closebutton_mouseover.dds')
 		welcome.close:SetHandler("OnClicked", FTC.Welcome )
-		
+
 		-- Change the styling
 		welcome.buffer = _G["FTC_WelcomeBuffer"]
 		welcome.buffer:SetFont(FTC.UI:Font("standard",18,true))
@@ -36,7 +36,7 @@
 		FTC_WelcomeSlider:SetHidden(false)
 	end
 
-	--[[ 
+	--[[
 	 * Add Welcome Message
 	 * --------------------------------
 	 * Called by FTC.UI:Controls()
@@ -53,14 +53,14 @@
 		welcome:AddText("To get straight into the action you can access the addon's configuration options by navigating to |cCC6600Settings -> Addon Settings -> FTC|r or by typing |cCC6600/ftc|r in chat. From this menu you can enable or disable FTC components, customize appearance and other component settings, and reposition UI elements added by the FTC addon.")
 		welcome:AddText("|c|r")
 		welcome:AddText("Additionaly, FTC adds several optional hotkeys which you may bind to make using certain addon features more convenient. These hotkeys can be mapped by navigating to |cCC6600Controls -> Foundry Tactical Combat|r. The next section briefly details the changes included in this version of the addon.")
-		welcome:AddText("|c|r")       
+		welcome:AddText("|c|r")
 
 		-- Add changelog
 		welcome:AddText("|cCC6600Version " .. FTC.version .. " Updates|r")
 
 		-- Register changes
     local Changes = {
-			
+
 			[1] = {
 				"Title",
 				"Message",
@@ -68,16 +68,16 @@
 			}
 
 		-- Write to window
-		for i = 1 , #Changes do 
-			local list = Changes[i]
-			welcome:AddText("|c|r")		
-			welcome:AddText(list[1])		
-			for i = 2 , #list do
-				welcome:AddText("+ " .. list[i])	
+		for windowIndex = 1 , #Changes do
+			local list = Changes[windowIndex]
+			welcome:AddText("|c|r")
+			welcome:AddText(list[1])
+			for listIndex = 2 , #list do
+				welcome:AddText("+ " .. list[listIndex])
 			end
 		end
 
 		-- Add closing messages
-		welcome:AddText("|c|r")	
+		welcome:AddText("|c|r")
 		welcome:AddText("If you have any feedback, bug reports, or other questions about Foundry Tactical Combat please contact |cCC6600@Atropos|r or send an email to |cCC6600atropos@tamrielfoundry.com|r. Thank you for using the FTC addon and for your support!")
 	end

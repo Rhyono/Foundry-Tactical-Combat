@@ -2,21 +2,21 @@
 --[[----------------------------------------------------------
 	FTC CORE FUNCTIONS
   ]]----------------------------------------------------------
-	local FTC = FTC 
-  
-	 --[[ 
+	local FTC = FTC
+
+	 --[[
 	 * A handy chaining function for quickly setting up UI elements
 	 * Allows us to reference methods to set properties without calling the specific object
-	 ]]-- 
+	 ]]--
 	function FTC.Chain( object )
-		
+
 		-- Setup the metatable
 		local T = {}
 		setmetatable( T , { __index = function( self , func )
-			
+
 			-- Know when to stop chaining
 			if func == "__END" then	return object end
-			
+
 			-- Otherwise, add the method to the parent object
 			return function( self , ... )
 				assert( object[func] , func .. " missing in object" )
@@ -24,31 +24,31 @@
 				return self
 			end
 		end })
-		
+
 		-- Return the metatable
 		return T
 	end
 
-	--[[ 
+	--[[
 	 * Append Table 2 to Table 1
 	 * --------------------------------
 	 * Called by Default Vars
 	 * --------------------------------
-	 ]]--  
+	 ]]--
 	function FTC:JoinTables(t1,t2)
-		local t1 = t1 or {}
-		local t2 = t2 or {}
+		t1 = t1 or {}
+		t2 = t2 or {}
 		for k,v in pairs(t2) do t1[k]=v end
 		return t1
 	end
- 
-	--[[ 
+
+	--[[
 	 * Display Addon Welcome Message / Notes
 	 * --------------------------------
 	 * Called by FTC:OnLoad()
 	 * --------------------------------
-	 ]]--  
-	function FTC.Welcome() 
+	 ]]--
+	function FTC.Welcome()
 
         -- Show welcome message
         if ( FTC.Vars.welcomed ~= FTC.version ) then
@@ -74,7 +74,7 @@
 
             -- Register that the user has been welcomed
             FTC.Vars.welcomed = FTC.version
-			
+
 			--until reenabled
 			welcome:SetHidden(true)
         	FTC_UI:SetAlpha(100)
@@ -85,12 +85,12 @@
         end
 	end
 
-	 --[[ 
+	 --[[
 	 * Handle Special Visibility Needs
 	 * --------------------------------
 	 * Called by FTC.OnLayerChange()
 	 * --------------------------------
-	 ]]--  
+	 ]]--
 	function FTC:ToggleVisibility( activeLayerIndex )
 
 		-- We only need to act if it's in move, or welcome mode
@@ -105,13 +105,13 @@
 		-- Maybe disable welcome message
 		if ( FTC.inWelcome and activeLayerIndex > 2 ) then FTC.Welcome() end
 	end
-	
-	 --[[ 
+
+	 --[[
 	 * Return Localized Delimited Number
 	 * --------------------------------
 	 * Called by (many)
 	 * --------------------------------
-	 ]]--  
+	 ]]--
 	function FTC.DisplayNumber(number,places)
 
 		-- Determine thousands and decimal format
@@ -123,7 +123,7 @@
 		local output = 0
 
 		-- If the number is less than 1000
-		if ( number < 1000 ) then 
+		if ( number < 1000 ) then
 			output = string.format("%."..places.."f",number)
 			output = string.gsub(output,"%.",decimal)
 
@@ -133,7 +133,7 @@
 			local left, right = zo_strsplit("%.",output)
 			left = FormatIntegerWithDigitGrouping(left,thousands)
 			output = left .. decimal .. right
-		
+
 		-- Greater than 1000 no decimals
 		else
 			output = FormatIntegerWithDigitGrouping(number,thousands)
@@ -143,13 +143,13 @@
 		return output
 	end
 
-	--[[ 
+	--[[
 	 * Slash Function
 	 * --------------------------------
 	 * Triggered by /ftc or /FTC
 	 * --------------------------------
-	 ]]--  
+	 ]]--
 	function FTC:Slash( text )
 	    LAM2:OpenToPanel(FTC_Menu)
 	end
-	
+

@@ -1,4 +1,4 @@
- 
+
 --[[----------------------------------------------------------
     UNIT FRAMES COMPONENT
   ]]----------------------------------------------------------
@@ -9,17 +9,17 @@
         -- Configuration
         ["PlayerFrame"]             = true,
         ["TargetFrame"]             = true,
-        ["DefaultTargetFrame"]      = false,        
+        ["DefaultTargetFrame"]      = false,
         ["LabelFrames"]             = false,
         ["GroupFrames"]             = true,
         ["RaidFrames"]              = true,
-        
+
         -- Player Frame
         ["FTC_PlayerFrame"]         = {TOPRIGHT,CENTER,-250,180},
         ["EnableNameplate"]         = true,
         ["EnableXPBar"]             = true,
         ["FrameWidth"]              = 350,
-        ["FrameHeight"]             = 180,  
+        ["FrameHeight"]             = 180,
 
         -- Target Frame
         ["FTC_TargetFrame"]         = {TOPLEFT,CENTER,250,180},
@@ -27,7 +27,7 @@
 		["TargetFrameLevel"]        = true,
 		["TargetFrameTitle"]        = true,
 		["TargetFrameWidth"]        = 350,
-        ["TargetFrameHeight"]       = 120,  
+        ["TargetFrameHeight"]       = 120,
 
         -- Shared Settings
         ["FrameFontSize"]           = 18,
@@ -41,7 +41,7 @@
         -- Group Frame
         ["FTC_GroupFrame"]          = {TOPLEFT,TOPLEFT,6,50},
         ["GroupWidth"]              = 250,
-        ["GroupHeight"]             = 350,  
+        ["GroupHeight"]             = 350,
         ["GroupHidePlayer"]         = false,
         ["GroupFontSize"]           = 18,
         ["ColorRoles"]              = true,
@@ -53,15 +53,15 @@
         -- Raid Frame
         ["FTC_RaidFrame"]           = {TOPLEFT,TOPLEFT,6,50},
         ["RaidWidth"]               = 120,
-        ["RaidHeight"]              = 50,  
+        ["RaidHeight"]              = 50,
         ["RaidColumnSize"]          = 6,
         ["RaidFontSize"]            = 14,
 
         -- Shared Settings
         ["FrameOpacityIn"]          = 100,
-        ["FrameOpacityOut"]         = 60, 
-		["FrameTargetOpacityIn"]    = 100,   
-        ["FrameTargetOpacityOut"]   = 60,    
+        ["FrameOpacityOut"]         = 60,
+		["FrameTargetOpacityIn"]    = 100,
+        ["FrameTargetOpacityOut"]   = 60,
         ["FrameFont1"]              = 'esobold',
         ["FrameFont2"]              = 'esobold',
     }
@@ -71,7 +71,7 @@
     UNIT FRAMES FUNCTIONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Initialize Unit Frames Component
      * --------------------------------
      * Called by FTC:Initialize()
@@ -88,7 +88,7 @@
                 frame:UnregisterForEvent(EVENT_INTERFACE_SETTING_CHANGED)
                 frame:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
                 EVENT_MANAGER:UnregisterForUpdate("ZO_PlayerAttribute"..frames[i].."FadeUpdate")
-                frame:SetHidden(true)       
+                frame:SetHidden(true)
             end
         end
 
@@ -107,7 +107,7 @@
         EVENT_MANAGER:RegisterForUpdate( "FTC_PlayerFrame" , 5000 , function() FTC.Frames:SafetyCheck() end )
     end
 
-      --[[ 
+      --[[
      * Set Up Player Frame
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -121,7 +121,7 @@
 
         -- Custom player frame
         if ( FTC.Vars.PlayerFrame ) then
-        
+
             -- Configure the nameplate
             if ( FTC.Vars.EnableNameplate ) then
                 local name      = zo_strformat("<<!aC:1>>",FTC.Player.name)
@@ -129,22 +129,22 @@
                 FTC_PlayerFrame_PlateName:SetText( name .. " (" .. level .. ")" )
             end
             FTC_PlayerFrame_Plate:SetHidden( not FTC.Vars.EnableNameplate )
-            
+
             -- Setup alternate bar
             FTC.Frames:SetupAltBar()
         end
         FTC_PlayerFrame:SetHidden( not FTC.Vars.PlayerFrame )
 
         -- Repopulate attributes
-        FTC.Player:UpdateAttribute( 'player', POWERTYPE_HEALTH, nil )
-        FTC.Player:UpdateAttribute( 'player', POWERTYPE_MAGICKA, nil )
-        FTC.Player:UpdateAttribute( 'player', POWERTYPE_STAMINA, nil )
+        FTC.Player:UpdateAttribute( 'player', COMBAT_MECHANIC_FLAGS_HEALTH, nil )
+        FTC.Player:UpdateAttribute( 'player', COMBAT_MECHANIC_FLAGS_MAGICKA, nil )
+        FTC.Player:UpdateAttribute( 'player', COMBAT_MECHANIC_FLAGS_STAMINA, nil )
 
         -- Repopulate shield
         FTC.Player:UpdateShield(    'player' , nil , nil )
     end
-     
-     --[[ 
+
+     --[[
      * Set Up Target Frame
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -161,17 +161,17 @@
         if ( FTC.Vars.TargetFrame and FTC.Vars.DefaultTargetFrame == false ) then FTC.TARGET_WINDOW:SetHidden(true) end
 
         -- Bail out if no target unless we are moving
-        if ( not DoesUnitExist('reticleover') and not FTC.move ) then 
+        if ( not DoesUnitExist('reticleover') and not FTC.move ) then
             FTC_TargetFrame:SetHidden(true)
             return
         end
-        
+
         -- Custom Target Frame
-        if ( FTC.Vars.TargetFrame) then 
+        if ( FTC.Vars.TargetFrame) then
 
             -- Get the frame
             local frame     = _G['FTC_TargetFrame']
-        
+
             -- Get data
             local name      = zo_strformat("<<!aC:1>>",FTC.Vars.TargetFrameShowAccount and FTC.Target.display or FTC.Target.name)
             local level     = FTC.Target.vlevel > 0 and "c" .. FTC.Target.vlevel or FTC.Target.level
@@ -180,18 +180,18 @@
             local rank      = nil
 
             -- Players
-            if ( IsUnitPlayer('reticleover') ) then 
+            if ( IsUnitPlayer('reticleover') ) then
                 icon  = GetClassIcon(GetUnitClassId('reticleover'))
                 title = GetUnitTitle( 'reticleover' ) == "" and GetAvARankName( GetUnitGender('reticleover') , GetUnitAvARank('reticleover') ) or GetUnitTitle( 'reticleover' )
                 rank  = GetAvARankIcon(GetUnitAvARank('reticleover'))
-            
+
             -- Champion Mobs
-            elseif ( GetUnitDifficulty('reticleover') == 2) then 
+            elseif ( GetUnitDifficulty('reticleover') == 2) then
                 icon  = "/esoui/art/lfg/lfg_normaldungeon_down.dds"
                 title = GetUnitCaption( 'reticleover' )
 
             -- Boss Mobs
-            elseif ( GetUnitDifficulty('reticleover') >= 3 ) then 
+            elseif ( GetUnitDifficulty('reticleover') >= 3 ) then
                 icon  = "/esoui/art/unitframes/target_veteranrank_icon.dds"
                 title = GetUnitCaption( 'reticleover' )
 
@@ -205,21 +205,21 @@
             frame.plate.class:SetTexture( icon )
             frame.plate.class:SetHidden( icon == nil )
             frame.lplate.title:SetText(zo_strformat("<<!aC:1>>",title))
-            
+
             -- Populate rank icon
             frame.lplate.rank:SetTexture( rank )
-            frame.lplate.rank:SetHidden( rank == nil )       
-        end 
+            frame.lplate.rank:SetHidden( rank == nil )
+        end
         FTC_TargetFrame:SetHidden(not FTC.Vars.TargetFrame)
 
         -- Repopulate health
-        FTC.Player:UpdateAttribute( 'reticleover', POWERTYPE_HEALTH , nil )
-        
+        FTC.Player:UpdateAttribute( 'reticleover', COMBAT_MECHANIC_FLAGS_HEALTH , nil )
+
         -- Repopulate shield
         FTC.Player:UpdateShield( 'reticleover' , nil )
     end
 
-     --[[ 
+     --[[
      * Set Up Group Frame
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -233,24 +233,24 @@
 
         -- Using group frame
         local context   = nil
-        if ( IsUnitGrouped('player') and GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+        if ( IsUnitGrouped('player') and GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then
             context = "Group"
-            FTC_RaidFrame:SetHidden(true) 
+            FTC_RaidFrame:SetHidden(true)
             ZO_UnitFramesGroups:SetHidden(true)
 
         -- Using raid frames
         elseif ( IsUnitGrouped('player') and FTC.Vars.RaidFrames ) then
             context = "Raid"
-            FTC_GroupFrame:SetHidden(true) 
+            FTC_GroupFrame:SetHidden(true)
             ZO_UnitFramesGroups:SetHidden(true)
 
         -- Using default frames
         else
-            FTC_GroupFrame:SetHidden(true) 
+            FTC_GroupFrame:SetHidden(true)
             FTC_RaidFrame:SetHidden(true)
             FTC.Frames.groupUpdate = true
 			ZO_UnitFramesGroups:SetHidden(false)
-            return 
+            return
         end
 
         -- Get the parent container
@@ -274,7 +274,7 @@
                 local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
 
                 -- Get player roles
-				local role = GetGroupMemberSelectedRole(unitTag) 
+				local role = GetGroupMemberSelectedRole(unitTag)
 				role = role==2 and "Tank" or (role==4 and "Healer" or "Damage")
                 FTC.Group[i].role = role
 
@@ -290,7 +290,7 @@
                 frame.plate.name:SetText(label)
 
                 -- Populate raid icon
-                if ( context == "Raid" ) then 
+                if ( context == "Raid" ) then
                     frame.plate.icon:SetTexture(IsUnitGroupLeader(unitTag) and "/esoui/art/lfg/lfg_leader_icon.dds" or classIcon )
                     frame.plate.icon:SetHidden(classIcon==nil)
 
@@ -302,7 +302,7 @@
                 end
 
                 -- Populate health data
-                FTC.Player:UpdateAttribute( unitTag , POWERTYPE_HEALTH , nil )
+                FTC.Player:UpdateAttribute( unitTag , COMBAT_MECHANIC_FLAGS_HEALTH , nil )
 
                 -- Change the bar color
                 FTC.Frames:GroupRange( 'group'..i , nil )
@@ -310,7 +310,7 @@
                 -- Maybe hide the player
                 if ( context == "Group" ) then
                     if ( FTC.Vars.GroupHidePlayer and i == GetGroupIndexByUnitTag('player') ) then
-                        frame:SetHidden(true) 
+                        frame:SetHidden(true)
                         frame:SetHeight(0)
                     else frame:SetHeight(FTC.Vars.GroupHeight/4) end
                 end
@@ -326,7 +326,7 @@
         FTC.Frames.groupUpdate = true
     end
 
-     --[[ 
+     --[[
      * Handle Group Member Visibility
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -336,7 +336,7 @@
 
         -- Using group frame
         local context   = nil
-        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then
             context = "Group"
 
         -- Using raid frames
@@ -364,8 +364,8 @@
         local newColor  = inRange and color or { color[1]/3 , color[2]/3 , color[3]/3 }
         frame.health.bar:SetColor(unpack(newColor))
     end
-	
-     --[[ 
+
+     --[[
      * Get Ultimate Frame
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -375,7 +375,7 @@
 
         -- Using group frame
         local context   = nil
-        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+        if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then
             context = "Group"
 
         -- Using raid frames
@@ -403,13 +403,13 @@
     ATTRIBUTES
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Render Attribute Change
      * --------------------------------
      * Called by FTC.Player:UpdateAttribute()
      * --------------------------------
      ]]--
-    function FTC.Frames:Attribute( unitTag , attribute , powerValue , powerMax , pct , shieldValue ) 
+    function FTC.Frames:Attribute( unitTag , attribute , powerValue , powerMax , pct , shieldValue )
 
         -- Setup placeholders
         local frame     = nil
@@ -423,7 +423,7 @@
             frame   = _G["FTC_PlayerFrame"]
             default = _G["FTC_Player"..attribute]
             enabled = FTC.Vars.PlayerFrame
-        
+
         -- Target Frame
         elseif ( unitTag == 'reticleover' ) then
             frame   = _G["FTC_TargetFrame"]
@@ -437,17 +437,17 @@
             local i = GetGroupIndexByUnitTag(unitTag)
 
             -- Small group
-            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then
                 enabled = true
                 frame   = _G["FTC_GroupFrame" .. i]
 
             -- Raid group
-            elseif ( FTC.Vars.RaidFrames ) then 
+            elseif ( FTC.Vars.RaidFrames ) then
                 enabled = true
-                frame   = _G["FTC_RaidFrame" .. i]  
+                frame   = _G["FTC_RaidFrame" .. i]
                 round   = true
                 max     = false
-            
+
             -- Otherwise bail
             else return end
         end
@@ -462,9 +462,9 @@
 				label = FTC.DisplayNumber( powerValue/1000000 , 3 ) .. "m"
 			elseif (powerValue > 100000 or round) then
 				label = FTC.DisplayNumber( powerValue/1000 , 1 ) .. "k"
-			end	
+			end
             local pctLabel = (pct*100) .. "%"
-                
+
             -- Maybe add shielding
             if ( attribute == "health" ) then
                 local shield = shieldValue or 0
@@ -473,20 +473,20 @@
             end
 
             -- Maybe add maximum
-            if ( max ) then 
+            if ( max ) then
                 local maxHealth = ( round ) and FTC.DisplayNumber(powerMax/1000,1).."k" or FTC.DisplayNumber(powerMax)
                 label = label .. "  /  " .. maxHealth
             end
 
             -- Override for dead things
-            if ( attribute == "health" and ( IsUnitDead(unitTag) or powerValue == 0 ) ) then 
+            if ( attribute == "health" and ( IsUnitDead(unitTag) or powerValue == 0 ) ) then
                 label = GetString(FTC_Dead)
                 pct = 0
                 pctLabel = ""
             end
 
             -- Override for offline members
-            if ( not IsUnitOnline(unitTag) ) then 
+            if ( not IsUnitOnline(unitTag) ) then
                 label = GetString(FTC_Offline)
                 pct = 0
                 pctLabel = ""
@@ -518,8 +518,8 @@
         end
     end
 
-   
-     --[[ 
+
+     --[[
      * Render Shield Change
      * --------------------------------
      * Called by FTC.Player:UpdateShield()
@@ -536,7 +536,7 @@
         if ( unitTag == 'player' ) then
             frame   = _G["FTC_PlayerFrame"]
             enabled = FTC.Vars.PlayerFrame
-        
+
         -- Target Frame
         elseif ( unitTag == 'reticleover' ) then
             frame   = _G["FTC_TargetFrame"]
@@ -549,25 +549,25 @@
             local i = GetGroupIndexByUnitTag(unitTag)
 
             -- Small group
-            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then 
+            if ( GetGroupSize() <= 4 and FTC.Vars.GroupFrames ) then
                 enabled = true
                 frame   = _G["FTC_GroupFrame" .. i]
 
             -- Raid group
-            elseif ( FTC.Vars.RaidFrames ) then 
+            elseif ( FTC.Vars.RaidFrames ) then
                 enabled = true
                 frame   = _G["FTC_RaidFrame" .. i]
-                round   = true  
+                round   = true
 
             -- Otherwise bail out
             else return end
         end
-        
+
         -- Update custom frames
-        if ( enabled ) then 
+        if ( enabled ) then
             frame.shield:SetWidth( math.min(shieldPct,1) * frame.health:GetWidth())
             frame.shield.bar:SetWidth(frame.shield:GetWidth()-4)
-            frame.shield:SetHidden( shieldValue <= 0 )   
+            frame.shield:SetHidden( shieldValue <= 0 )
         end
 
         -- Refresh health display
@@ -579,7 +579,7 @@
     ALTERNATE BAR
   ]]-----------------------------------------------------------
 
-     --[[ 
+     --[[
      * Set Up Alternate Experience/Mount/Werewolf/Siege Bar
      * --------------------------------
      * Called by FTC.Frames:SetupPlayer()
@@ -591,17 +591,18 @@
     function FTC.Frames:SetupAltBar(mode,state)
 		if not mode then mode = false end
 		if not state then state = false end
-		
+
         -- Bail if the player frame is hidden
         if ( not FTC.Vars.PlayerFrame ) then return end
 
         -- Retrieve the bar
         local parent = _G["FTC_PlayerFrame_Alt"]
-        
+        local maxExp, currExp
+
         -- Player is mounted
         if (mode == "mounted" and state) then
             -- Set the context
-            parent.context = "mount" 
+            parent.context = "mount"
 
             -- Change the icon and color
             parent.icon:SetTexture("/esoui/art/icons/mapkey/mapkey_stables.dds")
@@ -637,7 +638,7 @@
             parent.bar:SetColor(0.8,0,0,1)
 
             -- Fetch the current siege health level
-            local current, maximum, effectiveMax = GetUnitPower( 'controlledsiege' , POWERTYPE_HEALTH )
+            local current, maximum, effectiveMax = GetUnitPower( 'controlledsiege' , COMBAT_MECHANIC_FLAGS_HEALTH )
             parent.bar:SetWidth( math.min(current/maximum,1) * (parent.bg:GetWidth()-6) )
 
         -- Player is above level 50
@@ -646,11 +647,11 @@
             parent.context = "exp"
 
             -- Bail if the bar is disabled
-            if ( not FTC.Vars.EnableXPBar ) then 
-                parent:SetHidden(true)  
-                return 
+            if ( not FTC.Vars.EnableXPBar ) then
+                parent:SetHidden(true)
+                return
             end
-            
+
             -- Setup placeholders
             local icon = nil
             local color = nil
@@ -659,7 +660,7 @@
             local rank = GetChampionPointPoolForRank(GetPlayerChampionPointsEarned())
 
             -- The Warrior
-            if ( rank == 2 ) then 
+            if ( rank == 2 ) then
                 icon = "/esoui/art/champion/champion_points_health_icon-hud-32.dds"
                 color = {0.6,0.2,0}
 
@@ -667,7 +668,7 @@
             elseif ( rank == 0 ) then
                 icon = "/esoui/art/champion/champion_points_magicka_icon-hud-32.dds"
                 color = {0,0.6,1}
-            
+
             -- The Thief
             else
                 icon = "/esoui/art/champion/champion_points_stamina_icon-hud-32.dds"
@@ -677,8 +678,8 @@
             -- Change the icon and color
             parent.icon:SetTexture(icon)
             parent.bg:SetCenterColor(color[1]/6,color[2]/6,color[3]/6,1)
-            parent.bar:SetColor(unpack(color))  
-            
+            parent.bar:SetColor(unpack(color))
+
             -- Fetch the current experience level
 			maxExp = GetNumChampionXPInChampionPoint(FTC.Player.clevel)
             currExp = GetPlayerChampionXP()
@@ -694,9 +695,9 @@
             parent.context = "exp"
 
             -- Bail if the bar is disabled
-            if ( not FTC.Vars.EnableXPBar ) then 
-                parent:SetHidden(true)  
-                return 
+            if ( not FTC.Vars.EnableXPBar ) then
+                parent:SetHidden(true)
+                return
             end
 
             -- Change the icon and color
@@ -711,10 +712,10 @@
         end
 
         -- Ensure bar visibility
-        parent:SetHidden(false)     
+        parent:SetHidden(false)
     end
-     
-     --[[ 
+
+     --[[
      * Update Mount Stamina Bar
      * --------------------------------
      * Called by FTC.OnPowerUpdate()
@@ -724,33 +725,33 @@
 
         -- Get the alternate bar
         local parent    = _G["FTC_PlayerFrame_Alt"]
-        
+
         -- Bail if the bar is currently used for something else
         if ( parent.context ~= "mount" ) then return end
-        
+
         -- Change the bar width
         parent.bar:SetWidth( ( powerValue / powerEffectiveMax ) * ( parent.bg:GetWidth()-6 ) )
     end
 
-     --[[ 
+     --[[
      * Update Siege Health Bar
      * --------------------------------
      * Called by FTC.OnPowerUpdate()
      * --------------------------------
      ]]--
      function FTC.Frames:UpdateSiege( powerValue , powerMax , powerEffectiveMax )
-     
+
         -- Get the alternate bar
         local parent    = _G["FTC_PlayerFrame_Alt"]
-        
+
         -- Bail if the bar is currently used for something else
         if ( parent.context ~= "siege" ) then return end
 
         -- Change the bar width
         parent.bar:SetWidth( ( powerValue / powerEffectiveMax ) * ( parent.bg:GetWidth()-6 ) )
     end
-     
-     --[[ 
+
+     --[[
      * Update Werewolf Remaining Timer
      * --------------------------------
      * Called by FTC.OnPowerUpdate()
@@ -760,10 +761,10 @@
 
         -- Get the alternate bar
         local parent    = _G["FTC_PlayerFrame_Alt"]
-        
+
         -- Bail if the bar is currently used for something else
         if ( parent.context ~= "werewolf" ) then return end
-        
+
         -- Change the bar width
         parent.bar:SetWidth( math.min(powerValue/powerEffectiveMax,1) * ( parent:GetWidth()-6 ) )
     end
@@ -773,7 +774,7 @@
     UPDATING
   ]]----------------------------------------------------------
 
-     --[[ 
+     --[[
      * Safety Check Function to Ensure Accuracy
      * --------------------------------
      * Called by FTC.Frames:Initialize()
@@ -786,9 +787,9 @@
 
             -- Make sure attributes are up to date
             if ( not FTC.inMenu ) then
-                FTC.Player:UpdateAttribute( 'player',POWERTYPE_HEALTH,nil,nil,nil  )
-                FTC.Player:UpdateAttribute( 'player',POWERTYPE_MAGICKA,nil,nil,nil )
-                FTC.Player:UpdateAttribute( 'player',POWERTYPE_STAMINA,nil,nil,nil )
+                FTC.Player:UpdateAttribute( 'player',COMBAT_MECHANIC_FLAGS_HEALTH,nil,nil,nil  )
+                FTC.Player:UpdateAttribute( 'player',COMBAT_MECHANIC_FLAGS_MAGICKA,nil,nil,nil )
+                FTC.Player:UpdateAttribute( 'player',COMBAT_MECHANIC_FLAGS_STAMINA,nil,nil,nil )
                 FTC.Player:UpdateShield(    'player',nil,nil )
             end
 
@@ -805,7 +806,7 @@
 
             -- Update attributes out of combat
             for i = 1 , GetGroupSize() do
-                if ( not IsUnitInCombat('player') ) then FTC.Player:UpdateAttribute( GetGroupUnitTagByIndex(i),POWERTYPE_HEALTH,nil,nil,nil ) end
+                if ( not IsUnitInCombat('player') ) then FTC.Player:UpdateAttribute( GetGroupUnitTagByIndex(i),COMBAT_MECHANIC_FLAGS_HEALTH,nil,nil,nil ) end
                 FTC.Frames:GroupRange( 'group'..i , nil )
             end
         end

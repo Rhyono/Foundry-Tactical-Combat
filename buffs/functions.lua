@@ -7,11 +7,11 @@
     FTC.Buffs.Defaults = {
 
         -- Player Debuffs
-        ["FTC_PlayerDebuffs"]       = {BOTTOMRIGHT,CENTER,-250,174}, 
+        ["FTC_PlayerDebuffs"]       = {BOTTOMRIGHT,CENTER,-250,174},
         ["PlayerDebuffFormat"]      = "htiles",
 
         -- Player Buffs
-        ["FTC_PlayerBuffs"]         = {TOPRIGHT,CENTER,-250,366},  
+        ["FTC_PlayerBuffs"]         = {TOPRIGHT,CENTER,-250,366},
         ["PlayerBuffFormat"]        = "ldlist",
 
         -- Long Buffs
@@ -19,14 +19,14 @@
         ["LongBuffFormat"]          = "vtiles",
 
         -- Target Buffs
-        ["FTC_TargetBuffs"]         = {BOTTOMLEFT,CENTER,250,174}, 
+        ["FTC_TargetBuffs"]         = {BOTTOMLEFT,CENTER,250,174},
         ["TargetBuffFormat"]        = "htiles",
 
         -- Target Debuffs
-        ["FTC_TargetDebuffs"]       = {TOPLEFT,CENTER,250,306},  
+        ["FTC_TargetDebuffs"]       = {TOPLEFT,CENTER,250,306},
         ["TargetDebuffFormat"]      = "ldlist",
 
-        -- Shared Settings  
+        -- Shared Settings
         ["MaxBuffs"]                = 7,
 
         -- Fonts
@@ -41,7 +41,7 @@
     BUFF TRACKING FUNCTIONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Initialize Buff Tracking Component
      * --------------------------------
      * Called by FTC:Initialize()
@@ -52,17 +52,17 @@
         -- Setup displayed buff tables
         FTC.Buffs.Player = {}
         FTC.Buffs.Target = {}
-        
+
         -- Create the controls
         FTC.Buffs:Controls()
 
         -- Populate initial buffs
         FTC.Buffs:GetBuffs('player')
-        
+
         -- Setup status flags
         FTC.Buffs.lastCast  = 0
         FTC.Buffs.pending = {}
-        
+
         -- Register init status
         FTC.init.Buffs = true
 
@@ -75,7 +75,7 @@
     EVENT HANDLERS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Get Unit Buffs
      * --------------------------------
      * Called by FTC.Buffs:Initialize()
@@ -90,14 +90,14 @@
 
         -- Iterate through buffs, translating them to into the correct format
         for i = 1 , GetNumBuffs( unitTag ) do
-        
+
             -- Get the buff information
-            local buffName , timeStarted , timeEnding , buffSlot , stackCount , iconFilename , buffType , effectType , abilityType , statusEffectType , abilityId , canClickOff = GetUnitBuffInfo( unitTag , i )
+            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo( unitTag , i )
             FTC.Buffs:EffectChanged( 1 , unitTag , GetUnitName(unitTag) , 0 , effectType , buffName , abilityType , abilityId , buffType , statusEffectType , timeStarted , timeEnding , iconFilename )
         end
     end
 
-    --[[ 
+    --[[
      * Handle Effect Change Event
      * --------------------------------
      * Called by FTC.OnEffectChanged()
@@ -116,18 +116,21 @@
 
         -- Remove existing effects
         if ( changeType == 2 ) then
-            FTC.Buffs[context][effectName] = nil 
+            FTC.Buffs[context][effectName] = nil
             FTC.Buffs:ReleaseUnusedBuffs()
-       
+
         -- Otherwise register a new effect
         else
 
             -- Run the effects through a global filter
+    --[[TODO why is effectName used here when it is already an argument of the parent function
+    Should the function's argument be buffName instead]]--
+            local isValid, isType
             isValid, effectName, isType = FTC:FilterBuffInfo( unitTag , abilityId , effectName )
 
             -- Consider effects that are exactly zero seconds as permanent
             if ( endTime - beginTime == 0 ) then isType = "P" end
-            
+
             -- Suppress effects that are less than 2 seconds in duration
             if ( isType == nil ) and ( endTime - beginTime <= 2 ) then isValid = false end
 
@@ -137,7 +140,7 @@
             end
 
             -- Process valid buffs
-            if ( isValid ) then 
+            if ( isValid ) then
 
                 -- Populate the slot object
                 local target   = GetAbilityTargetDescription(ability_id)
@@ -155,12 +158,12 @@
                 }
 
                 -- Pass it to the buff handler
-                FTC.Buffs:NewEffect( ability , context )  
+                FTC.Buffs:NewEffect( ability , context )
             end
         end
     end
 
-    --[[ 
+    --[[
      * Register New Buffs
      * --------------------------------
      * Called by FTC.Buffs.SetStateCustom()
@@ -187,11 +190,11 @@
 
             -- Add buff data
             ability.ends = 0
-            
+
             -- Assign buff to pooled control
             local control, objectKey = FTC.Buffs.Pool:AcquireObject()
             control.id = objectKey
-            control.icon:SetTexture(ability.icon) 
+            control.icon:SetTexture(ability.icon)
             ability.control = control
 
             -- Add buff to timed table
@@ -214,7 +217,7 @@
         FTC.Buffs:ReleaseUnusedBuffs()
     end
 
-     --[[ 
+     --[[
      * Wipe Out Buffs on Death
      * --------------------------------
      * Called by FTC:OnDeath()
@@ -223,15 +226,15 @@
     function FTC.Buffs:WipeBuffs( owner )
 
         -- Determine context
-        local owner   = zo_strformat("<<!aC:1>>",owner)  
+        owner = zo_strformat("<<!aC:1>>", owner)
         local context = ( owner ~= FTC.Player.name ) and "Target" or "Player"
-        
+
         -- Wipe out buffs that are specific to the deceased
         for name , buff in pairs( FTC.Buffs[context] ) do
             if ( buff.owner == owner and ( buff.area == false or buff.pending == true ) ) then
                 FTC.Buffs.Pool:ReleaseObject(buff.control.id)
                 FTC.Buffs[context][name] = nil
-            end 
+            end
         end
     end
 
@@ -239,7 +242,7 @@
     UPDATING FUNCTIONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Buff Tracking Updating Function
      * --------------------------------
      * Called by FTC_PlayerBuffs:OnUpdate()
@@ -252,8 +255,8 @@
         local context       = ( unitTag == 'player' ) and "Player" or "Target"
 
         -- Hide target buffs if we have no target
-        FTC_TargetBuffs:SetHidden( context == "Target" and FTC.init.Frames and FTC_TargetFrame:IsHidden() ) 
-        
+        FTC_TargetBuffs:SetHidden( context == "Target" and FTC.init.Frames and FTC_TargetFrame:IsHidden() )
+
         -- Bail out if no buffs are present
         if ( next(FTC.Buffs[context]) == nil ) then return end
 
@@ -267,14 +270,14 @@
         local buffCount     = 0
         local debuffCount   = 0
         local longCount     = 0
-            
+
         -- Loop through buffs
         for i = 1 , #buffs do
-        
+
             -- Bail out if we have already rendered the maximum allowable buffs
             local isCapped  = ( buffCount > FTC.Vars.MaxBuffs ) and ( debuffCount > FTC.Vars.MaxBuffs ) and ( ( context == "Player" and longCount > FTC.Vars.MaxBuffs ) or context == "Target" )
             if ( isCapped ) then break end
-        
+
             -- Gather data
             local render    = true
             local name      = buffs[i].name
@@ -282,40 +285,40 @@
             local label     = buffs[i].toggle or ""
             local control   = buffs[i].control
             local duration  = zo_roundToNearest( buffs[i].ends - gameTime , 0.1 )
-            
+
             -- Skip abilities which have not begun yet
             if ( buffs[i].begin > gameTime ) then render = false end
 
             -- Purge expired abilities
             if ( duration <= 0 and buffs[i].toggle == nil ) then
-                FTC.Buffs[context][name] = nil 
+                FTC.Buffs[context][name] = nil
                 FTC.Buffs.Pool:ReleaseObject(control.id)
                 render = false
 
             -- Remove buffs belonging to old owners
             elseif ( buffs[i].owner ~= GetUnitName(unitTag) ) then
                 render = false
-            
+
                 -- Purge long duration buffs
                 if ( buffs[i].toggle ~= nil or ( duration >= 60 ) ) then
-                    FTC.Buffs[context][name] = nil 
+                    FTC.Buffs[context][name] = nil
                     FTC.Buffs.Pool:ReleaseObject(control.id)
-               
+
                 -- Ensure that single-target timed abilities are hidden
                 else control:SetHidden(true) end
 
             -- Otherwise process away!
             elseif ( render ) then
-                if ( duration > 0 ) then 
+                if ( duration > 0 ) then
 
                     -- Flag long buffs
                     isLong = ( duration >= 60 ) and true or isLong
-                        
+
                     -- Format displayed duration
                     if ( duration > 3600 ) then
                         local hours     = math.floor( duration / 3600 )
                         label           = string.format( "%dh" , hours )
-                    elseif ( duration > 60 ) then   
+                    elseif ( duration > 60 ) then
                         local minutes   = math.floor( duration / 60 )
                         label           = string.format( "%dm" , minutes )
                     else label = FTC.DisplayNumber( duration , 1 ) end
@@ -327,10 +330,10 @@
                 control.cooldown:SetHidden(true)
                 control.cooldown:SetAlpha(0.7)
                 control.label:SetText(label)
-                control.name:ClearAnchors()    
+                control.name:ClearAnchors()
                 control.name:SetText(zo_strformat("<<!aC:1>>",name))
-                control.name:SetHidden(true)      
-                
+                control.name:SetHidden(true)
+
                 -- Setup placeholders
                 local format    = "disabled"
                 local container = nil
@@ -356,7 +359,7 @@
                     -- Set display options
                     control.frame:SetTexture('/esoui/art/actionbar/debuff_frame.dds')
                     control.cooldown:StartCooldown( ( buffs[i].ends - gameTime ) * 1000 , ( buffs[i].ends - buffs[i].begin ) * 1000 , CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false )
-                    control.cooldown:SetHidden(false)    
+                    control.cooldown:SetHidden(false)
 
                 -- Buffs
                 else
@@ -364,7 +367,7 @@
                     container   =  _G["FTC_"..context.."Buffs"]
                     buffCount   = buffCount + 1
                     count       = buffCount
-                   
+
                     -- Set display options
                     control.frame:SetTexture('/esoui/art/actionbar/buff_frame.dds')
                     control.cooldown:StartCooldown( ( buffs[i].ends - gameTime ) * 1000 , ( buffs[i].ends - buffs[i].begin ) * 1000 , CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false )
@@ -372,7 +375,7 @@
                 end
 
                 -- Update display if not disabled
-                if ( format ~= "disabled" ) then 
+                if ( format ~= "disabled" ) then
 
                     -- Set anchors
                     local anchor = {}
@@ -403,7 +406,7 @@
     HELPER FUNCTIONS
   ]]----------------------------------------------------------
 
-    --[[ 
+    --[[
      * Sort Buffs Table by Duration
      * --------------------------------
      * Called by Buffs:Update()
@@ -411,7 +414,7 @@
      ]]--
     function FTC.Buffs.Sort(x,y)
         if ( x.toggle == "P" and y.toggle == "T" ) then return true
-        elseif ( x.toggle ~= nil ) then return false 
+        elseif ( x.toggle ~= nil ) then return false
         elseif ( y.toggle ~= nil ) then return true
         else return x.ends < y.ends end
     end

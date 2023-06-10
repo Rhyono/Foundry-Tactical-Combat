@@ -122,11 +122,8 @@ function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectTy
   else
 
     -- Run the effects through a global filter
-    --[[TODO why is effectName used here when it is already an argument of the parent function
-    Should the function's argument be buffName instead]]--
-
     local isValid, isType
-    isValid, effectName, isType = FTC:FilterBuffInfo(unitTag, abilityId, effectName)
+    isValid, isType = FTC:FilterBuffInfo(unitTag, abilityId, effectName)
 
     -- Consider effects that are exactly zero seconds as permanent
     if (endTime - beginTime == 0) then isType = "P" end
@@ -143,7 +140,9 @@ function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectTy
     if (isValid) then
 
       -- Populate the slot object
-      local target = GetAbilityTargetDescription(ability_id)
+      local abilityTypeArea = abilityType == ABILITY_TYPE_AREAEFFECT
+      local abilityEffectType = effectType == BUFF_EFFECT_TYPE_DEBUFF
+      -- if targetAreaEffect and (targetAreaEffect == abilityTypeArea) then d("Same Area Effect") end
       local ability = {
         ["owner"] = GetUnitName(unitTag),
         ["id"] = abilityId,
@@ -151,11 +150,12 @@ function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectTy
         ["begin"] = beginTime,
         ["ends"] = endTime,
         ["icon"] = iconName,
-        ["ground"] = (target == GetAbilityTargetDescription(23182)),
-        ["area"] = ((target == GetAbilityTargetDescription(23182)) or (target == GetAbilityTargetDescription(20919)) or (target == GetAbilityTargetDescription(22784))),
-        ["debuff"] = effectType == BUFF_EFFECT_TYPE_DEBUFF,
+        ["area"] = abilityTypeArea,
+        ["debuff"] = abilityEffectType,
         ["toggle"] = isType,
       }
+      --[[TODO update ["area"] Removed (target == GetAbilityTargetDescription(22784) for now
+       since it returns nil ]]--
 
       -- Pass it to the buff handler
       FTC.Buffs:NewEffect(ability, context)

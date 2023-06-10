@@ -352,17 +352,16 @@ function FTC.OnStealthState(eventCode, unitTag, stealthState)
   if (FTC.init.Buffs and unitTag == 'player') then
 
     -- Entered stealth
-    local hidden = GetAbilityName(20309)
+    local hidden = GetAbilityName(FTC_ABILITYID_STEALTH_HIDDEN)
     if (stealthState == STEALTH_STATE_HIDDEN or stealthState == STEALTH_STATE_HIDDEN_ALMOST_DETECTED or stealthState == STEALTH_STATE_STEALTH or stealthState == STEALTH_STATE_STEALTH_ALMOST_DETECTED) then
 
       -- Setup buff object
       local ability = {
         ["owner"] = FTC.Player.name,
-        ["id"] = 20309,
+        ["id"] = FTC_ABILITYID_STEALTH_HIDDEN,
         ["name"] = hidden,
         ["dur"] = 0,
         ["icon"] = FTC.UI.Textures[hidden],
-        ["ground"] = false,
         ["area"] = false,
         ["debuff"] = false,
         ["toggle"] = "T"
@@ -459,7 +458,7 @@ end
  * Called by EVENT_EFFECT_CHANGED
  * --------------------------------
  ]]--
-function FTC.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId)
+function FTC.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
 
   -- Pass information to buffs component
   if (FTC.init.Buffs) then FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectType, effectName, abilityType, abilityId, buffType, statusEffectType, beginTime, endTime, iconName) end
@@ -475,7 +474,7 @@ end
  * Called by EVENT_COMBAT_EVENT
  * --------------------------------
  ]]--
-function FTC.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+function FTC.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
 
   -- Ignore errors
   if (isError) then return end

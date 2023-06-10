@@ -10,11 +10,11 @@
  ]]--
 function FTC.Buffs:IsToggle(name)
   local Toggles = {
-    23304, -- Unstable Familiar
-    23319, -- Unstable Clannfear
-    23316, -- Volatile Familiar
+    23617, -- Unstable Familiar
+    23644, -- Unstable Clannfear
+    23641, -- Volatile Familiar
     24613, -- Summon Winged Twilight
-    24636, -- Summon Restoring Twilight
+    24636, -- Summon Twilight Tormentor
     24639, -- Summon Twilight Matriarch
     24158, -- Bound Armor
     24165, -- Bound Armaments
@@ -26,11 +26,10 @@ function FTC.Buffs:IsToggle(name)
     40483, -- Radiant Magelight
     25954, -- Inferno
     23853, -- Flames of Oblivion
-    32881, -- Sea of Flames
-    3403, -- Guard
+    32881, -- Cauterize
+    61511, -- Guard
     61536, -- Mystic Guard
     61529, -- Stalwart Guard
-    14890, -- Brace (Generic)
   }
   for i = 1, #Toggles do
     if (name == GetAbilityName(Toggles[i])) then return true end
@@ -57,22 +56,27 @@ function FTC.Buffs:ClearShields()
     -- Sorcerer
     28418, -- Conjured Ward
     29489, -- Hardened Ward
-    29482, -- Empowered Ward
+    29482, -- Regenerative Ward
 
     -- Templar
     22178, -- Sun Shield
     22182, -- Radiant Ward
     22180, -- Blazing Shield
 
+    -- Arcanist
+    178448, -- Runespite Ward
+    183241, -- Impervious Runeward
+    185901, -- Spiteward of the Lucid Mind
+
     -- Weapons
     5798, -- Brawler
     38401, -- Shielded Assault
     40130, -- Ward Ally
     40126, -- Healing Ward
-    31639, -- Steadfast Ward
+    37232, -- Steadfast Ward
 
     -- AvA
-    38175, -- Barrier
+    38573, -- Barrier
     40237, -- Reviving Barrier
     40239, -- Replenishing Barrier
 
@@ -106,12 +110,17 @@ end
  ]]--
 function FTC.Buffs:IsTaunt(name)
   local Taunts = {
-    3493, -- Puncture
+    28306, -- Puncture
     38256, -- Ransack
     38250, -- Pierce Armor
     39475, -- Inner Fire
     42056, -- Inner Rage
     42060, -- Inner Beast
+
+    -- Arcanist
+    178447, -- Runic Jolt
+    186531, -- Runic Embrace
+    183430, -- Runic Sunder
   }
   for i = 1, #Taunts do
     if (name == GetAbilityName(Taunts[i])) then return true end
@@ -125,16 +134,16 @@ end
  * Called by FTC.Buffs:EffectChanged()
  * --------------------------------
  ]]--
-function FTC:FilterBuffInfo(unitTag, abilityId, name)
+function FTC:FilterBuffInfo(unitTag, abilityId, effectName)
 
   -- Default to no isType
   local isType = nil
   local isValid = true
 
   -- Toggles
-  if (FTC.Buffs:IsToggle(name)) then
+  if (FTC.Buffs:IsToggle(effectName)) then
     isType = "T"
-    return isValid, name, isType
+    return isValid, isType
   end
 
   -- Boons
@@ -157,7 +166,7 @@ function FTC:FilterBuffInfo(unitTag, abilityId, name)
     if (abilityId == Boons[i]) then
       isValid = (unitTag == 'player')
       isType = "P"
-      return isValid, name, isType
+      return isValid, isType
     end
   end
 
@@ -172,7 +181,7 @@ function FTC:FilterBuffInfo(unitTag, abilityId, name)
     if (abilityId == Vamp[i]) then
       isValid = true
       isType = "V" .. i
-      return isValid, name, isType
+      return isValid, isType
     end
   end
 
@@ -180,7 +189,7 @@ function FTC:FilterBuffInfo(unitTag, abilityId, name)
   if (abilityId == 35658) then
     isValid = true
     isType = "W"
-    return isValid, name, isType
+    return isValid, isType
   end
 
   -- AvA Bonuses
@@ -195,7 +204,7 @@ function FTC:FilterBuffInfo(unitTag, abilityId, name)
     if (abilityId == AvA[i]) then
       isValid = (unitTag == 'player')
       isType = "P"
-      return isValid, name, isType
+      return isValid, isType
     end
   end
 
@@ -212,10 +221,10 @@ function FTC:FilterBuffInfo(unitTag, abilityId, name)
   for i = 1, #Ignored do
     if (abilityId == Ignored[i]) then
       isValid = false
-      return isValid, name, isType
+      return isValid, isType
     end
   end
 
   -- Return other buffs
-  return isValid, name, isType
+  return isValid, isType
 end

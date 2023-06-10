@@ -143,21 +143,21 @@ function FTC.SCT:Damage(damage)
 
     -- Override shield absorbs
     if (damage.result == ACTION_RESULT_DAMAGE_SHIELDED) then
-      name = zo_strformat("<<!aC:1>>", GetAbilityName(30869))
+      name = zo_strformat("<<!aC:1>>", GetAbilityName(FTC_ABILITYID_ABSORB))
       color = { 0.4, 0, 0.6 }
-      damage.icon = FTC.UI.Textures[GetAbilityName(30869)]
+      damage.icon = FTC.UI.Textures[GetAbilityName(FTC_ABILITYID_ABSORB)]
 
       -- Override blocks
     elseif (damage.result == ACTION_RESULT_BLOCKED_DAMAGE) then
-      name = zo_strformat("<<!aC:1>>", GetAbilityName(2890))
+      name = zo_strformat("<<!aC:1>>", GetAbilityName(FTC_ABILITYID_BLOCK))
       color = { 0.6, 0.1, 0 }
-      damage.icon = FTC.UI.Textures[GetAbilityName(2890)]
+      damage.icon = FTC.UI.Textures[GetAbilityName(FTC_ABILITYID_BLOCK)]
 
       -- Override misses and dodges
     elseif (damage.result == ACTION_RESULT_DODGED or damage.result == ACTION_RESULT_MISS) then
-      name = zo_strformat("<<!aC:1>>", GetAbilityName(30934))
+      name = zo_strformat("<<!aC:1>>", GetAbilityName(FTC_ABILITYID_DODGE))
       color = { 0.2, 0.2, 0.8 }
-      damage.icon = FTC.UI.Textures[GetAbilityName(30934)]
+      damage.icon = FTC.UI.Textures[GetAbilityName(FTC_ABILITYID_DODGE)]
     end
 
     -- Augment crits

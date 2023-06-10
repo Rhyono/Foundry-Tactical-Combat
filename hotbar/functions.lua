@@ -44,7 +44,7 @@ end
 function FTC.Hotbar:UltimateBuff(damage)
 
   -- Bail if it's not a correct trigger
-  if ((not damage.out) and damage.result == ACTION_RESULT_BLOCKED_DAMAGE) or (damage.out and damage.weapon and (not FTC:IsCritter('reticleover')) and (damage.ability ~= GetAbilityName(4858))) then
+  if ((not damage.out) and damage.result == ACTION_RESULT_BLOCKED_DAMAGE) or (damage.out and damage.weapon and (not FTC:IsCritter('reticleover')) and (damage.ability ~= GetAbilityName(FTC_ABILITYID_BASH))) then
     FTC.Hotbar:UltiFade()
   end
 end

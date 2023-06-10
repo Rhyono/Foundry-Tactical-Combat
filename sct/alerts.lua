@@ -161,7 +161,7 @@ function FTC.SCT:NewCC(result, abilityName, outgoing)
   if (outgoing) then return end
 
   -- Crowd control breaks
-  if (abilityName == GetAbilityName(16565)) then
+  if (abilityName == GetAbilityName(FTC_ABILITYID_BREAK_FREE)) then
     local newAlert = {
       ["name"] = "ccBreak",
       ["label"] = GetString(FTC_BreakFree) .. "!",

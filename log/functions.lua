@@ -244,7 +244,7 @@ function FTC.Log:CombatEvent(damage)
     local amount = " for |cEEEEEE" .. FTC.DisplayNumber(damage.value) .. "|r" .. dtype .. "."
 
     -- Ignore Sprinting and Crouching
-    if (ability == GetAbilityName(15356) or ability == GetAbilityName(20301)) then return end
+    if (ability == GetAbilityName(FTC_ABILITYID_SPRINT_DRAIN) or ability == GetAbilityName(FTC_ABILITYID_CROUCH_DRAIN)) then return end
 
     -- Outgoing damage
     local color = { 1, 1, 1 }
@@ -297,7 +297,7 @@ end
  * Called by FTC.OnXPUpdate()
  * --------------------------------
  ]]--
-function FTC.Log:AP(eventCode, alliancePoints, playSound, difference)
+function FTC.Log:AP(eventCode, alliancePoints, playSound, difference, reason, reasonSupplementaryInfo)
   if (difference < 0) then return end
 
   -- Print to log

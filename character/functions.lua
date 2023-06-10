@@ -371,10 +371,22 @@ end
 function FTC:GetAbilityId(abilityName)
 
   -- Loop over all ability IDs until we find it
-  for i = 1, 70000 do
+  for i = 1, 200000 do
     if (DoesAbilityExist(i) and (GetAbilityName(i) == abilityName)) then
       d(i .. " -- " .. abilityName)
       return i
+    end
+  end
+end
+
+function FTC:FindAbilityIds(abilityName)
+
+  -- Loop over all ability IDs until we find it
+  for i = 1, 200000 do
+    local nameLower = string.lower(GetAbilityName(i))
+    abilityName = string.lower(abilityName)
+    if (DoesAbilityExist(i) and string.find(nameLower, abilityName) ) then
+      d(i .. " -- " .. GetAbilityName(i))
     end
   end
 end

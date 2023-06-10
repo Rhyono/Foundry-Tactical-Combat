@@ -34,7 +34,7 @@ function FTC.Damage:New(result, abilityName, abilityGraphic, abilityActionSlotTy
   local target = zo_strformat("<<!aC:1>>", targetName)
   local player = zo_strformat("<<!aC:1>>", FTC.Player.name)
   local damageOut = false
-  if (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET) then damageOut = true
+  if (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET or sourceType == COMBAT_UNIT_TYPE_PLAYER_COMPANION) then damageOut = true
   elseif (target == player) then damageOut = false
   else return end
 
@@ -126,14 +126,13 @@ function FTC.Damage:New(result, abilityName, abilityGraphic, abilityActionSlotTy
   elseif (result == ACTION_RESULT_INTERRUPT or result == ACTION_RESULT_STUNNED or result == ACTION_RESULT_OFFBALANCE or result == ACTION_RESULT_DISORIENTED or result == ACTION_RESULT_STAGGERED or result == ACTION_RESULT_FEARED or result == ACTION_RESULT_SILENCED or result == ACTION_RESULT_ROOTED) then
 
     -- Trigger Break Free buff
-    if (FTC.init.Buffs and damage.ability == GetAbilityName(16565)) then
+    if (FTC.init.Buffs and damage.ability == GetAbilityName(FTC_ABILITYID_BREAK_FREE)) then
       local ability = {
         ["owner"] = FTC.Player.name,
-        ["id"] = 16565,
+        ["id"] = FTC_ABILITYID_BREAK_FREE,
         ["name"] = GetString(FTC_BreakFree),
         ["dur"] = 8000,
-        ["icon"] = FTC.UI.Textures[GetAbilityName(16565)],
-        ["ground"] = false,
+        ["icon"] = FTC.UI.Textures[GetAbilityName(FTC_ABILITYID_BREAK_FREE)],
         ["area"] = false,
         ["debuff"] = false,
         ["toggle"] = nil,

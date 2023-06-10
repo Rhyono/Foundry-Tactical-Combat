@@ -609,7 +609,7 @@ function FTC.Frames:SetupAltBar(mode, state)
     parent.bar:SetColor(FTC.Vars.FrameStaminaColor[1], FTC.Vars.FrameStaminaColor[2], FTC.Vars.FrameStaminaColor[3], 1)
 
     -- Fetch the current mount stamina level
-    local current, maximum, effectiveMax = GetUnitPower('player', POWERTYPE_MOUNT_STAMINA)
+    local current, maximum, effectiveMax = GetUnitPower('player', COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
     parent.bar:SetWidth(math.min(current / effectiveMax, 1) * (parent.bg:GetWidth() - 6))
 
     -- Player is transformed into a werewolf
@@ -623,7 +623,7 @@ function FTC.Frames:SetupAltBar(mode, state)
     parent.bar:SetColor(0.8, 0, 0, 1)
 
     -- Fetch the current werewolf time remaining
-    local current, maximum, effectiveMax = GetUnitPower('player', POWERTYPE_WEREWOLF)
+    local current, maximum, effectiveMax = GetUnitPower('player', COMBAT_MECHANIC_FLAGS_WEREWOLF)
     parent.bar:SetWidth(math.min(current / maximum, 1) * (parent.bg:GetWidth() - 6))
 
     -- Player is controlling a siege weapon

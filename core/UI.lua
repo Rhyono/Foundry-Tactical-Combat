@@ -104,12 +104,17 @@ end
 function FTC:GetAbilityIcons()
 
   -- Iterate over categories, lines, and abilities
-  for c = 1, 8 do
-    for l = 1, 10 do
-      for a = 1, 10 do
+  local numSkillTypes = GetNumSkillTypes()
+  local numSkillLines
+  local numSkillAbilities
+  for c = 1, numSkillTypes do
+    numSkillLines = GetNumSkillLines(c)
+    for l = 1, numSkillLines do
+      numSkillAbilities = GetNumSkillAbilities(c, l)
+      for a = 1, numSkillAbilities do
 
         -- Load ability info into table
-        local name, texture, rank, actionSlotType, passive, showInSpellbook = GetSkillAbilityInfo(c, l, a)
+        local name, texture, earnedRank, passive, ultimate, purchased, progressionIndex, rank = GetSkillAbilityInfo(c, l, a)
         if (name ~= "") then FTC.UI.Textures[name] = texture end
       end
     end
@@ -137,7 +142,7 @@ function FTC:GetAbilityIcons()
     [2890] = '/esoui/art/icons/ability_warrior_030.dds', -- Block
     [30869] = '/esoui/art/icons/ability_mage_058.dds', -- Absorb
     [30934] = '/esoui/art/icons/ability_rogue_037.dds', -- Dodge
-    [20309] = '/esoui/art/icons/ability_rogue_044.dds', -- Hidden
+    [FTC_ABILITYID_STEALTH_HIDDEN] = '/esoui/art/icons/ability_rogue_044.dds', -- Hidden
     [24684] = '/esoui/art/icons/ability_rogue_044.dds', -- Stealth
     [16565] = '/esoui/art/icons/ability_warrior_032.dds', -- CC Breaker
 

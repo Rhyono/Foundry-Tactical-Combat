@@ -1,4 +1,3 @@
-  
 --[[----------------------------------------------------------
     French LANGUAGE LOCALIZATION
   ]]----------------------------------------------------------
@@ -116,7 +115,7 @@ ZO_CreateStringId("FTC_Menu_FFont1Desc",    "Changer la police primaire utilisé
 ZO_CreateStringId("FTC_Menu_FFont2",        "Police Secondaire")
 ZO_CreateStringId("FTC_Menu_FFont2Desc",    "Changer la police secondaire utilisée dans les cadres unitaires de FTC. [Défaut: "..FTC.UI:TranslateFont(FTC.Defaults.FrameFont2).."]")
 
-ZO_CreateStringId("FTC_Menu_FFontS",        "Taille de Police du Cadre Unitaire") 
+ZO_CreateStringId("FTC_Menu_FFontS",        "Taille de Police du Cadre Unitaire")
 ZO_CreateStringId("FTC_Menu_FFontSDesc",    "Changer l'échelle de base de la police utilisée dans les cadres unitaires de FTC. [Défaut: "..FTC.Defaults.FrameFontSize.."]")
 
 ZO_CreateStringId("FTC_Menu_Exceute",       "Seuil d'Exécution")

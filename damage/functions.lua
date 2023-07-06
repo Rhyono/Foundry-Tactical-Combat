@@ -154,7 +154,7 @@ function FTC.Damage:New(result, abilityName, abilityGraphic, abilityActionSlotTy
     if (FTC.init.Stats and sourceType == COMBAT_UNIT_TYPE_PLAYER) then FTC.Stats:RegisterDamage(damage) end
 
     -- Target Death
-  elseif (result == ACTION_RESULD_DIED or result == ACTION_RESULT_DIED_XP) then
+  elseif (result == ACTION_RESULT_DIED or result == ACTION_RESULT_DIED_XP) then
 
     -- Wipe Buffs
     if (FTC.init.Buffs) then FTC.Buffs:WipeBuffs(targetName) end

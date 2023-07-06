@@ -67,6 +67,7 @@ function FTC.Buffs:ClearShields()
     178448, -- Runespite Ward
     183241, -- Impervious Runeward
     185901, -- Spiteward of the Lucid Mind
+    178449, -- Gibbering Shield
 
     -- Weapons
     5798, -- Brawler
@@ -116,6 +117,12 @@ function FTC.Buffs:IsTaunt(name)
     39475, -- Inner Fire
     42056, -- Inner Rage
     42060, -- Inner Beast
+
+    -- Fighters Guild
+    40336, -- Silver Leash
+
+    -- Destruction Staff
+    38989, -- Frost Clench
 
     -- Arcanist
     178447, -- Runic Jolt

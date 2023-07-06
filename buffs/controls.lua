@@ -2,7 +2,7 @@
     BUFF TRACKING CONTROLS
   ]]----------------------------------------------------------
 
---[[ 
+--[[
  * Create Buff Tracking UI
  * --------------------------------
  * Called by FTC.Frames:Initialize()
@@ -77,7 +77,7 @@ end
     BUFF POOL FUNCTIONS
   ]]----------------------------------------------------------
 
---[[ 
+--[[
  * Add New Buff Control to Pool
  * --------------------------------
  * Called by FTC.Buffs.Pool
@@ -109,7 +109,7 @@ function FTC.Buffs:CreateBuff()
   return buff
 end
 
---[[ 
+--[[
  * Release Control to Pool Callback
  * --------------------------------
  * Called by FTC.Buffs.Pool
@@ -123,7 +123,7 @@ function FTC.Buffs:ReleaseBuff(object)
   object.name:SetText()
 end
 
---[[ 
+--[[
  * Release All Unused Buff Controls
  * --------------------------------
  * Called by FTC.Buffs:EffectChanged()
@@ -131,7 +131,6 @@ end
  * --------------------------------
  ]]--
 function FTC.Buffs:ReleaseUnusedBuffs()
-
   -- Iterate over active controls
   for _, control in pairs(FTC.Buffs.Pool.m_Active) do
     local isUsed = false

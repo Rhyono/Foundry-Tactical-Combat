@@ -85,9 +85,6 @@ function FTC.Target:Update()
   -- Hide default frame
   if (FTC.init.Frames and not FTC.Vars.DefaultTargetFrame) then FTC.TARGET_WINDOW:SetHidden(true) end
 
-  -- Get the target name
-  local name = GetUnitName('reticleover')
-
   -- Ignore empty and critters, but not during move mode
   local ignore = ((not DoesUnitExist('reticleover')) or FTC:IsCritter('reticleover')) and not FTC.move
 
@@ -122,7 +119,7 @@ end
   ]]----------------------------------------------------------
 FTC.Group = {}
 function FTC.Group:Initialize()
-  for i = 1, 24 do
+  for i = 1, MAX_GROUP_SIZE_THRESHOLD do
     FTC.Group[i] = {
       ["health"] = { ["current"] = 0, ["max"] = 0, ["pct"] = 100 },
       ["magicka"] = { ["current"] = 0, ["max"] = 0, ["pct"] = 100 },
@@ -130,9 +127,66 @@ function FTC.Group:Initialize()
       ["shield"] = { ["current"] = 0, ["max"] = 0, ["pct"] = 100 },
     }
   end
-  FTC.Group.members = 0
+  FTC.Group.groupSize = 0
+  FTC.Group.hasCompanion = false
+  FTC.Group.previousNumCompanions = 0
 end
 
+--[[
+* Determine if the player is not in a group with other players. In which case
+if the player has a companion summoned then there are two unit frames to
+generate for the player and the companion.
+* --------------------------------
+* Called by FTC.Frames:SetupGroup()
+* --------------------------------
+]]--
+function FTC.Group:ShowCompanionFrame()
+  -- the player and the players companion
+  if FTC.Group.groupSize == 0 and (HasActiveCompanion() or HasPendingCompanion()) then FTC.Group.hasCompanion = true
+  else FTC.Group.hasCompanion = false end
+  return FTC.Group.hasCompanion
+end
+
+--[[
+* Get group index by unitTag because the index depends on group size
+and distance of unit from the player
+* --------------------------------
+* Called by FTC.Frames:Initialize()
+* --------------------------------
+]]--
+function FTC.Group:GetGroupIndexByUnitTag(unitTag)
+  for index, info in pairs(FTC.Group) do
+    if type(info) == "table" then
+      if info.unitTag == unitTag then return FTC.Group[index].groupIndex end
+    end
+  end
+end
+
+function FTC.Group:IsUnitTagGroupTag(unitTag)
+  local isGroupUnitTag = string.find(unitTag, "group") and not string.find(unitTag, "companion")
+  local isGroupCompanionUnitTag = string.find(unitTag, "group") and string.find(unitTag, "companion")
+  return (isGroupUnitTag or isGroupCompanionUnitTag)
+end
+
+function FTC.Group:IsStandardGroupSize()
+  -- Is the current group size less than the
+  local groupSize = FTC.Group.groupSize <= STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.GroupFrames
+  return groupSize
+end
+
+function FTC.Group:IsLargeGroupSize()
+  -- the player and the players companion
+  local groupSize = FTC.Group.groupSize > STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.RaidFrames
+  return groupSize
+end
+
+function FTC.Group:UpdateNumCompanionsInGroup()
+  -- the player and the players companion
+  if GetNumCompanionsInGroup() ~= FTC.Group.previousNumCompanions then
+    FTC.Group.previousNumCompanions = GetNumCompanionsInGroup()
+    FTC.Frames:SetupGroup()
+  end
+end
 
 --[[----------------------------------------------------------
     EVENT HANDLERS
@@ -147,23 +201,32 @@ end
  * --------------------------------
  ]]--
 function FTC.Player:UpdateAttribute(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+  local currentUnitTag = unitTag
+  local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player
   local data = nil
-  if (unitTag == nil) then
+  if (currentUnitTag == nil) then
     return
 
-  elseif (unitTag == 'player') then
+  elseif (currentUnitTag == 'player') then
     data = FTC.Player
 
     -- Target
-  elseif (unitTag == 'reticleover') then
+  elseif (currentUnitTag == 'reticleover') then
     data = FTC.Target
 
+    -- Companion
+  elseif (currentUnitTag == 'companion') then
+    data = FTC.Group[FTC_LOCAL_COMPANION]
+
     -- Group
-  elseif (type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion"))) then
-    local i = GetGroupIndexByUnitTag(unitTag)
-    data = FTC.Group[i]
+  elseif isGroupUnitTag then
+    local index = FTC.Group:GetGroupIndexByUnitTag(currentUnitTag)
+    if not index then return end
+    data = FTC.Group[index]
+    -- get current unitTag if companion
+    currentUnitTag = data.unitTag
 
     -- Otherwise bail out
   else return end
@@ -174,7 +237,7 @@ function FTC.Player:UpdateAttribute(unitTag, powerType, powerValue, powerMax, po
 
   -- If no value was passed, get new data
   if (powerValue == nil) then
-    powerValue, powerMax, powerEffectiveMax = GetUnitPower(unitTag, powerType)
+    powerValue, powerMax, powerEffectiveMax = GetUnitPower(currentUnitTag, powerType)
   end
 
   -- Get the percentage
@@ -198,27 +261,35 @@ end
 * --------------------------------
 ]]--
 function FTC.Player:UpdateShield(unitTag, value, maxValue)
+  local currentUnitTag = unitTag
+  local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player
   local data = nil
-  if (unitTag == 'player') then
+  if (currentUnitTag == 'player') then
     data = FTC.Player
 
     -- Target
-  elseif (unitTag == 'reticleover') then
+  elseif (currentUnitTag == 'reticleover') then
     data = FTC.Target
 
+    -- Companion
+  elseif (currentUnitTag == 'companion') then
+    data = FTC.Group[FTC_LOCAL_COMPANION]
+
     -- Group
-  elseif (type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" and not (string.find(unitTag, "companion")) and ((GetGroupSize() <= 4 and FTC.Vars.GroupFrames) or FTC.Vars.RaidFrames)) then
-    local i = GetGroupIndexByUnitTag(unitTag)
-    data = FTC.Group[i]
+  elseif isGroupUnitTag then
+    local index = FTC.Group:GetGroupIndexByUnitTag(currentUnitTag)
+    if not index then return end
+    data = FTC.Group[index]
+    currentUnitTag = data.unitTag
 
     -- Otherwise bail out
   else return end
 
   -- If no value was passed, get new data
   if (value == nil) then
-    value = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0
+    value = GetUnitAttributeVisualizerEffectInfo(currentUnitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0
   end
 
   -- Get the unit's maximum health
@@ -385,7 +456,7 @@ function FTC:FindAbilityIds(abilityName)
   for i = 1, 200000 do
     local nameLower = string.lower(GetAbilityName(i))
     abilityName = string.lower(abilityName)
-    if (DoesAbilityExist(i) and string.find(nameLower, abilityName) ) then
+    if (DoesAbilityExist(i) and string.find(nameLower, abilityName)) then
       d(i .. " -- " .. GetAbilityName(i))
     end
   end

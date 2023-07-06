@@ -228,7 +228,7 @@ end
 * Called by FTC.OnAPUpdate()
 * --------------------------------
 ]]--
-function FTC.SCT:NewAP(eventCode, alliancePoints, playSound, difference)
+function FTC.SCT:NewAP(eventCode, alliancePoints, playSound, difference, reason, reasonSupplementaryInfo)
 
   -- Save tiny AP rewards for later
   if (difference > 0 and difference <= 5) then

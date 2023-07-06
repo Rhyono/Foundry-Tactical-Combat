@@ -16,7 +16,7 @@ function FTC.Menu:Initialize()
   -- Configure the master panel
   FTC.Menu.panel = {
     type = "panel",
-    name = FTC.tag,
+    name = FTC.modName,
     displayName = GetString(FTC_ShortInfo),
     author = "Atropos",
     version = FTC.version,
@@ -53,7 +53,7 @@ end
  * --------------------------------
  ]]--
 function FTC.Menu.Reposition(control)
-  if control ~= nil and control.data ~= nil and control.data.name ~= FTC.tag then return end
+  if control ~= nil and control.data ~= nil and control.data.name ~= FTC.modName then return end
 
   -- Unit Frames Display
   if (FTC.init.Frames and FTC.Vars.PlayerFrame) then
@@ -108,7 +108,7 @@ end
  * --------------------------------
  ]]--
 function FTC.Menu.Restore(control)
-  if control ~= nil and control.data ~= nil and control.data.name ~= FTC.tag then return end
+  if control ~= nil and control.data ~= nil and control.data.name ~= FTC.modName then return end
 
   -- Unit Frames Display
   if (FTC.init.Frames and FTC.Vars.PlayerFrame) then

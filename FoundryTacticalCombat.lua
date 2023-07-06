@@ -17,8 +17,8 @@
     Author:   		Atropos / Philgo68 / Demiknight (Dark Brotherhood) / Rhyono (Homestead/Morrowind/HotR/CC/Dragon Bones/Summerset/Wolfhunter/Murkmire/Wrathstone/Elsweyr/Scalebreaker/Dragonhold/Harrowstorm/Greymoor/Stonethorn/Markarth/FoA/Blackwood/Walking Flame/Deadlands)
 	  Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls / fugue / hypatian / Sharlikran
     Email:    		atropos@tamrielfoundry.com
-    Version:  		1.26
-    Updated:  		2023-06-06
+    Version:  		1.27
+    Updated:  		2023-07-05
   ]]--
 
 --[[----------------------------------------------------------
@@ -26,10 +26,10 @@
   ]]----------------------------------------------------------
 
 -- Core FTC Settings
-FTC = {}
-FTC.name = "FoundryTacticalCombat"
+FTC.addOnName = "FoundryTacticalCombat"
 FTC.tag = "FTC"
-FTC.version = 1.26
+FTC.modName = "Foundry Tactical Combat"
+FTC.version = 1.27
 FTC.settings = 0.60
 FTC.language = GetCVar("language.2")
 FTC.UI = WINDOW_MANAGER:CreateTopLevelWindow("FTC_UI")
@@ -63,7 +63,7 @@ FTC.move = false
 function FTC.Initialize(eventCode, addOnName)
 
   -- Only set up for FTC
-  if (addOnName ~= FTC.name) then return end
+  if (addOnName ~= FTC.addOnName) then return end
 
   -- Unregister setup event
   EVENT_MANAGER:UnregisterForEvent("FTC", EVENT_ADD_ON_LOADED)

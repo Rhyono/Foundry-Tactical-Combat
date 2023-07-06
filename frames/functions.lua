@@ -13,6 +13,13 @@ FTC.Frames.Defaults = {
   ["GroupFrames"] = true,
   ["RaidFrames"] = true,
 
+  -- Roles
+  [LFG_ROLE_INVALID] = "Default",
+  [LFG_ROLE_DPS] = "Damage",
+  [LFG_ROLE_TANK] = "Tank",
+  [LFG_ROLE_HEAL] = "Healer",
+  [FTC_COMPANION_ROLE] = "Companion",
+
   -- Player Frame
   ["FTC_PlayerFrame"] = { TOPRIGHT, CENTER, -250, 180 },
   ["EnableNameplate"] = true,
@@ -44,9 +51,11 @@ FTC.Frames.Defaults = {
   ["GroupHidePlayer"] = false,
   ["GroupFontSize"] = 18,
   ["ColorRoles"] = true,
+  ["FrameDefaultColor"] = { 133 / 255, 018 / 255, 013 / 255 },
   ["FrameTankColor"] = { 133 / 255, 018 / 255, 013 / 255 },
   ["FrameHealerColor"] = { 117 / 255, 077 / 255, 135 / 255 },
   ["FrameDamageColor"] = { 255 / 255, 196 / 255, 128 / 255 },
+  ["FrameCompanionColor"] = { 133 / 255, 018 / 255, 013 / 255 },
   ["GroupShowLevel"] = true,
 
   -- Raid Frame
@@ -228,19 +237,27 @@ FTC.Frames.groupUpdate = true
 function FTC.Frames:SetupGroup()
 
   -- Update data
-  FTC.Group.members = GetGroupSize()
+  local groupIndex = 0 -- start at 0 and add 1 each time a unit exists
+  FTC.Group.groupSize = GetGroupSize() + GetNumCompanionsInGroup() -- can not be more then MAX_GROUP_SIZE_THRESHOLD, game should adjust automatically
+  local showCompanion = FTC.Group:ShowCompanionFrame()
 
   -- Using group frame
   local context = nil
-  if (IsUnitGrouped('player') and GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then
+  if (FTC.Group:IsStandardGroupSize() and not showCompanion) then
     context = "Group"
     FTC_RaidFrame:SetHidden(true)
     ZO_UnitFramesGroups:SetHidden(true)
 
     -- Using raid frames
-  elseif (IsUnitGrouped('player') and FTC.Vars.RaidFrames) then
+  elseif FTC.Group:IsLargeGroupSize() then
     context = "Raid"
     FTC_GroupFrame:SetHidden(true)
+    ZO_UnitFramesGroups:SetHidden(true)
+
+    -- Show Companion Frame
+  elseif showCompanion then
+    context = "Group"
+    FTC_RaidFrame:SetHidden(true)
     ZO_UnitFramesGroups:SetHidden(true)
 
     -- Using default frames
@@ -255,14 +272,112 @@ function FTC.Frames:SetupGroup()
   -- Get the parent container
   local container = _G["FTC_" .. context .. "Frame"]
 
-  -- Iterate over members
-  local max = (context == "Group") and 4 or 24
-  for i = 1, max do
-    local frame = container["member" .. i]
-    local unitTag = GetGroupUnitTagByIndex(i)
+  if not showCompanion then
+    -- Iterate over only group members first
+    for i = 1, FTC.Group.groupSize do
+      local unitTag = GetGroupUnitTagByIndex(i)
+      local hidePlayer = (context == "Group") and FTC.Vars.GroupHidePlayer and (GetDisplayName() == GetUnitDisplayName(unitTag))
+      if (DoesUnitExist(unitTag)) and not hidePlayer then
+        groupIndex = groupIndex + 1
+        local frame = container["member" .. groupIndex]
+        FTC.Group[groupIndex].unitTag = unitTag
+        FTC.Group[groupIndex].groupIndex = groupIndex
 
-    -- Only proceed for members which exist
-    if (DoesUnitExist(unitTag)) then
+        -- Display the frame
+        frame:SetHidden(false)
+
+        -- Configure the nameplate
+        local name = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>", GetUnitName(unitTag))
+        local level = GetUnitChampionPoints(unitTag) > 0 and "c" .. GetUnitChampionPoints(unitTag) or GetUnitLevel(unitTag)
+        local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
+
+        -- Get role
+        local role = GetGroupMemberSelectedRole(unitTag)
+        if not role then role = LFG_ROLE_INVALID end
+        role = FTC.Frames.Defaults[role]
+        FTC.Group[groupIndex].role = role
+
+        -- Determine bar color
+        local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
+        -- Color bar by role
+        frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
+        frame.health.bar:SetColor(color[1], color[2], color[3], 1)
+        -- Change the bar color
+        FTC.Frames:GroupRange(unitTag, nil)
+
+        -- Populate nameplate
+        local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
+        frame.plate.name:SetText(label)
+
+        -- Populate raid icon
+        if (context == "Raid") then
+          frame.plate.icon:SetTexture(IsUnitGroupLeader(unitTag) and "/esoui/art/lfg/lfg_leader_icon.dds" or classIcon)
+          frame.plate.icon:SetHidden(classIcon == nil)
+
+          -- Populate group icons
+        elseif (context == "Group") then
+          frame.plate.icon:SetWidth(IsUnitGroupLeader(unitTag) and 24 or 0)
+          frame.plate.class:SetTexture(classIcon)
+          frame.plate.class:SetHidden(classIcon == nil)
+        end
+
+        -- Populate health data
+        FTC.Player:UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
+      end
+    end
+
+    -- Iterate over group members companions
+    for i = 1, FTC.Group.groupSize do
+      local unitTag = GetGroupUnitTagByIndex(i)
+      local companionUnitTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+      if (DoesUnitExist(companionUnitTag)) then
+        groupIndex = groupIndex + 1
+        local frame = container["member" .. groupIndex]
+        FTC.Group[groupIndex].unitTag = companionUnitTag
+        FTC.Group[groupIndex].groupIndex = groupIndex
+
+        -- Display the frame
+        frame:SetHidden(false)
+
+        -- Configure the nameplate
+        local name = zo_strformat("<<!aC:1>>", GetUnitName(companionUnitTag))
+        local level = GetUnitLevel(companionUnitTag)
+
+        -- Get role
+        local role = FTC.Frames.Defaults[FTC_COMPANION_ROLE]
+        FTC.Group[groupIndex].role = role
+
+        -- Determine bar color
+        local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
+        -- Color bar by role
+        frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
+        frame.health.bar:SetColor(color[1], color[2], color[3], 1)
+        -- Change the bar color
+        --[[TODO: Can the companion be out of range? ]]--
+        FTC.Frames:GroupRange(companionUnitTag, nil)
+
+        -- Populate nameplate
+        local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
+        frame.plate.name:SetText(label)
+
+        -- Do not Populate raid or group class or leader icon because it's a companion
+        frame.plate.icon:SetWidth(0)
+        frame.plate.icon:SetHidden(true)
+
+        -- Populate health data
+        FTC.Player:UpdateAttribute(companionUnitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
+
+      end
+    end
+  end
+
+  if showCompanion then
+    local unitTag = 'companion'
+    groupIndex = 1
+    if DoesUnitExist(unitTag) then
+      FTC.Group[groupIndex].unitTag = unitTag
+      FTC.Group[groupIndex].groupIndex = groupIndex
+      local frame = container["member" .. groupIndex]
 
       -- Display the frame
       frame:SetHidden(false)
@@ -270,52 +385,42 @@ function FTC.Frames:SetupGroup()
       -- Configure the nameplate
       local name = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>", GetUnitName(unitTag))
       local level = GetUnitChampionPoints(unitTag) > 0 and "c" .. GetUnitChampionPoints(unitTag) or GetUnitLevel(unitTag)
-      local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
 
-      -- Get player roles
-      local role = GetGroupMemberSelectedRole(unitTag)
-      role = role == 2 and "Tank" or (role == 4 and "Healer" or "Damage")
-      FTC.Group[i].role = role
+      -- Get role
+      local role = FTC.Frames.Defaults[FTC_COMPANION_ROLE]
+      FTC.Group[groupIndex].role = role
 
       -- Determine bar color
       local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
-
       -- Color bar by role
       frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
       frame.health.bar:SetColor(color[1], color[2], color[3], 1)
+      -- Change the bar color
+      FTC.Frames:GroupRange(unitTag, nil)
 
       -- Populate nameplate
       local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
       frame.plate.name:SetText(label)
 
-      -- Populate raid icon
-      if (context == "Raid") then
-        frame.plate.icon:SetTexture(IsUnitGroupLeader(unitTag) and "/esoui/art/lfg/lfg_leader_icon.dds" or classIcon)
-        frame.plate.icon:SetHidden(classIcon == nil)
-
-        -- Populate group icons
-      elseif (context == "Group") then
-        frame.plate.icon:SetWidth(IsUnitGroupLeader(unitTag) and 24 or 0)
-        frame.plate.class:SetTexture(classIcon)
-        frame.plate.class:SetHidden(classIcon == nil)
-      end
+      -- Hide companion icon
+      frame.plate.icon:SetWidth(0)
+      frame.plate.class:SetHidden(true)
 
       -- Populate health data
       FTC.Player:UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
 
-      -- Change the bar color
-      FTC.Frames:GroupRange('group' .. i, nil)
+    end
+  end
 
-      -- Maybe hide the player
-      if (context == "Group") then
-        if (FTC.Vars.GroupHidePlayer and i == GetGroupIndexByUnitTag('player')) then
-          frame:SetHidden(true)
-          frame:SetHeight(0)
-        else frame:SetHeight(FTC.Vars.GroupHeight / 4) end
-      end
+  -- hide all other unit frames
+  local hideStartIndex = groupIndex + 1
+  local hideEndIndex
+  if context == "Group" then hideEndIndex = STANDARD_GROUP_SIZE_THRESHOLD
+  elseif context == "Raid" then hideEndIndex = LARGE_GROUP_SIZE_THRESHOLD end
 
-      -- Otherwise hide the frame
-    else frame:SetHidden(true) end
+  for i = hideStartIndex, hideEndIndex do
+    local frame = container["member" .. i]
+    frame:SetHidden(true)
   end
 
   -- Display custom frames
@@ -332,31 +437,33 @@ end
 * --------------------------------
 ]]--
 function FTC.Frames:GroupRange(unitTag, inRange)
+  FTC.Group:UpdateNumCompanionsInGroup()
 
   -- Using group frame
   local context = nil
-  if (GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then
+  if FTC.Group:IsStandardGroupSize() then
     context = "Group"
 
     -- Using raid frames
-  elseif (FTC.Vars.RaidFrames) then
+  elseif FTC.Group:IsLargeGroupSize() then
     context = "Raid"
 
     -- Otherwise bail out
   else return end
 
-  -- Retrieve the frame
-  local i = GetGroupIndexByUnitTag(unitTag)
-  local frame = _G["FTC_" .. context .. "Frame" .. i]
-
+  -- Get index and assigned unitTag if it is a companion
+  local index = FTC.Group:GetGroupIndexByUnitTag(unitTag)
   -- Bail if the group member has not yet been set up
-  if (FTC.Group[i] == nil) then return end
+  if not index then return end
+
+  local currentUnitTag = FTC.Group[index].unitTag
+  local frame = _G["FTC_" .. context .. "Frame" .. index]
 
   -- If a range status was not passed, retrieve it
-  if (inRange == nil) then inRange = IsUnitInGroupSupportRange(unitTag) end
+  if (inRange == nil) then inRange = IsUnitInGroupSupportRange(currentUnitTag) end
 
   -- Get player roles
-  local role = FTC.Group[i].role
+  local role = FTC.Group[index].role
   local color = (FTC.Vars.ColorRoles and role ~= nil) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
 
   -- Darken the color of the bar
@@ -374,11 +481,11 @@ function FTC.Frames:GetUltimateFrame(unitTag)
 
   -- Using group frame
   local context = nil
-  if (GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then
+  if FTC.Group:IsStandardGroupSize() then
     context = "Group"
 
     -- Using raid frames
-  elseif (FTC.Vars.RaidFrames) then
+  elseif FTC.Group:IsLargeGroupSize() then
     context = "Raid"
 
     -- Otherwise bail out
@@ -387,8 +494,8 @@ function FTC.Frames:GetUltimateFrame(unitTag)
   end
 
   -- Retrieve the frame
-  local i = GetGroupIndexByUnitTag(unitTag)
-  local frame = _G["FTC_" .. context .. "Frame" .. i .. "_Ultimate"]
+  local index = FTC.Group:GetGroupIndexByUnitTag(unitTag)
+  local frame = _G["FTC_" .. context .. "Frame" .. index .. "_Ultimate"]
 
   if frame then
     return frame
@@ -416,40 +523,49 @@ function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shi
   local round = false
   local max = FTC.Vars.FrameShowMax
   local enabled = false
+  local currentUnitTag = unitTag
+  local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player Frame
-  if (unitTag == 'player') then
+  if (currentUnitTag == 'player') then
     frame = _G["FTC_PlayerFrame"]
     default = _G["FTC_Player" .. attribute]
     enabled = FTC.Vars.PlayerFrame
 
     -- Target Frame
-  elseif (unitTag == 'reticleover') then
+  elseif (currentUnitTag == 'reticleover') then
     frame = _G["FTC_TargetFrame"]
     default = _G["FTC_Target" .. attribute]
     enabled = FTC.Vars.TargetFrame
 
+  elseif (currentUnitTag == 'companion') then
+    enabled = true
+    frame = _G["FTC_GroupFrame" .. FTC_LOCAL_COMPANION]
+
     -- Group Frames
-  elseif (type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group") then
+  elseif isGroupUnitTag then
 
     -- Get the group member
-    local i = GetGroupIndexByUnitTag(unitTag)
-
+    local index = FTC.Group:GetGroupIndexByUnitTag(currentUnitTag)
+    if not index then return end
+    currentUnitTag = FTC.Group[index].unitTag
     -- Small group
-    if (GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then
+    if FTC.Group:IsStandardGroupSize() then
       enabled = true
-      frame = _G["FTC_GroupFrame" .. i]
+      frame = _G["FTC_GroupFrame" .. index]
 
       -- Raid group
-    elseif (FTC.Vars.RaidFrames) then
+    elseif FTC.Group:IsLargeGroupSize() then
       enabled = true
-      frame = _G["FTC_RaidFrame" .. i]
+      frame = _G["FTC_RaidFrame" .. index]
       round = true
       max = false
 
       -- Otherwise bail
     else return end
-  end
+    -- Otherwise bail
+  else return end
+
 
   -- Compute data
   if (enabled or (FTC.Vars.LabelFrames and default ~= nil)) then
@@ -478,14 +594,14 @@ function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shi
     end
 
     -- Override for dead things
-    if (attribute == "health" and (IsUnitDead(unitTag) or powerValue == 0)) then
+    if (attribute == "health" and (IsUnitDead(currentUnitTag) or powerValue == 0)) then
       label = GetString(FTC_Dead)
       pct = 0
       pctLabel = ""
     end
 
     -- Override for offline members
-    if (not IsUnitOnline(unitTag)) then
+    if (not IsUnitOnline(currentUnitTag)) then
       label = GetString(FTC_Offline)
       pct = 0
       pctLabel = ""
@@ -503,9 +619,9 @@ function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shi
       control.pct:SetText(pctLabel)
 
       -- Maybe prompt for execute
-      if (unitTag == 'reticleover') then
+      if (currentUnitTag == 'reticleover') then
         frame.execute:SetHidden(not (pct < FTC.Vars.ExecuteThreshold / 100))
-        if ((not IsUnitDead(unitTag)) and (pct < FTC.Vars.ExecuteThreshold / 100) and (FTC.Target.health.pct > FTC.Vars.ExecuteThreshold / 100)) then FTC.Frames:Execute() end
+        if ((not IsUnitDead(currentUnitTag)) and (pct < FTC.Vars.ExecuteThreshold / 100) and (FTC.Target.health.pct > FTC.Vars.ExecuteThreshold / 100)) then FTC.Frames:Execute() end
       end
     end
 
@@ -530,37 +646,46 @@ function FTC.Frames:Shield(unitTag, shieldValue, shieldPct, healthValue, healthM
   local frame = nil
   local round = false
   local enabled = false
+  local currentUnitTag = unitTag
+  local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player Frame
-  if (unitTag == 'player') then
+  if (currentUnitTag == 'player') then
     frame = _G["FTC_PlayerFrame"]
     enabled = FTC.Vars.PlayerFrame
 
     -- Target Frame
-  elseif (unitTag == 'reticleover') then
+  elseif (currentUnitTag == 'reticleover') then
     frame = _G["FTC_TargetFrame"]
     enabled = FTC.Vars.TargetFrame
 
+    -- Companion
+  elseif (currentUnitTag == 'companion') then
+    enabled = true
+    frame = _G["FTC_GroupFrame" .. FTC_LOCAL_COMPANION]
+
     -- Group Frames
-  elseif (type(unitTag) == "string" and string.sub(unitTag, 0, 5) == "group" and (FTC.Vars.GroupFrames or FTC.Vars.RaidFrames)) then
+  elseif isGroupUnitTag then
 
     -- Get the group member
-    local i = GetGroupIndexByUnitTag(unitTag)
+    local index = FTC.Group:GetGroupIndexByUnitTag(currentUnitTag)
+    if not index then return end
 
     -- Small group
-    if (GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then
+    if FTC.Group:IsStandardGroupSize() then
       enabled = true
-      frame = _G["FTC_GroupFrame" .. i]
+      frame = _G["FTC_GroupFrame" .. index]
 
       -- Raid group
-    elseif (FTC.Vars.RaidFrames) then
+    elseif FTC.Group:IsLargeGroupSize() then
       enabled = true
-      frame = _G["FTC_RaidFrame" .. i]
+      frame = _G["FTC_RaidFrame" .. index]
       round = true
 
       -- Otherwise bail out
     else return end
-  end
+    -- Otherwise bail out
+  else return end
 
   -- Update custom frames
   if (enabled) then
@@ -799,7 +924,7 @@ function FTC.Frames:SafetyCheck()
   -- Group frames
   if (IsUnitGrouped('player')) then
     local context = nil
-    if (GetGroupSize() <= 4 and FTC.Vars.GroupFrames) then context = "Group"
+    if (FTC.Group.groupSize <= STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.GroupFrames) then context = "Group"
     elseif (FTC.Vars.RaidFrames) then context = "Raid"
     else return end
 

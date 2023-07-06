@@ -664,4 +664,3 @@ function FTC.Buffs:HasFailure(slotIndex)
   elseif (HasReincarnatingFailure(slotIndex)) then return true end
   return false
 end
-    

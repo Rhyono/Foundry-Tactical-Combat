@@ -555,7 +555,7 @@ function FTC.Menu:Controls()
     { type = "dropdown",
       name = GetString(FTC_Menu_FRaidS),
       tooltip = GetString(FTC_Menu_FRaidSDesc),
-      choices = { 4, 6, 8, 12, 24 },
+      choices = { 4, 6, },
       getFunc = function() return FTC.Vars.RaidColumnSize end,
       setFunc = function(value) FTC.Menu:UpdateFrames("RaidColumnSize", value) end,
       default = FTC.Defaults.RaidColumnSize,

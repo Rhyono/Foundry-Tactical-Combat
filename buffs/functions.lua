@@ -92,7 +92,8 @@ function FTC.Buffs:GetBuffs(unitTag)
 
     -- Get the buff information
     local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
-    FTC.Buffs:EffectChanged(1, unitTag, GetUnitName(unitTag), 0, effectType, buffName, abilityType, abilityId, buffType, statusEffectType, timeStarted, timeEnding, iconFilename)
+    --[[Using EFFECT_RESULT_FULL_REFRESH just prevents EffectChanged from removing the effect data]]--
+    FTC.Buffs:EffectChanged(EFFECT_RESULT_FULL_REFRESH, unitTag, GetUnitName(unitTag), 0, effectType, buffName, abilityType, abilityId, buffType, statusEffectType, timeStarted, timeEnding, iconFilename, stackCount)
   end
 end
 
@@ -102,7 +103,7 @@ end
  * Called by FTC.OnEffectChanged()
  * --------------------------------
  ]]--
-function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectType, effectName, abilityType, abilityId, buffType, statusEffectType, beginTime, endTime, iconName)
+function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectType, effectName, abilityType, abilityId, buffType, statusEffectType, beginTime, endTime, iconName, stackCount)
 
   -- Only take action for player and target
   if (unitTag ~= "player" and unitTag ~= "reticleover") then return end
@@ -111,10 +112,10 @@ function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectTy
   local context = (unitTag == 'player') and "Player" or "Target"
 
   -- Debugging
-  --d( changeType .. " [" .. abilityId .. "] " .. effectName .. " || [" .. unitTag .. "] " .. unitName .. " (" .. unitId .. ") || " .. ( endTime - beginTime ) .. "s || " .. iconName )
+  --d( changeType .. " [" .. abilityId .. "] " .. effectName .. " || [" .. unitTag .. "] " .. unitName .. " (" .. unitId .. ") || " .. ( endTime - beginTime ) .. "s || " .. iconName .. " || " .. endTime.. " || " ..beginTime )
 
   -- Remove existing effects
-  if (changeType == 2) then
+  if (changeType == EFFECT_RESULT_FADED) then
     FTC.Buffs[context][effectName] = nil
     FTC.Buffs:ReleaseUnusedBuffs()
 
@@ -153,9 +154,8 @@ function FTC.Buffs:EffectChanged(changeType, unitTag, unitName, unitId, effectTy
         ["area"] = abilityTypeArea,
         ["debuff"] = abilityEffectType,
         ["toggle"] = isType,
+        ["stackCount"] = stackCount,
       }
-      --[[TODO update ["area"] Removed (target == GetAbilityTargetDescription(22784) for now
-       since it returns nil ]]--
 
       -- Pass it to the buff handler
       FTC.Buffs:NewEffect(ability, context)
@@ -171,6 +171,8 @@ end
  * Called by FTC.OnEffectChanged()
  * --------------------------------
  ]]--
+--[[ eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType,
+effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType ]]--
 function FTC.Buffs:NewEffect(ability, context)
 
   -- Provide backward compatibility for buff extensions

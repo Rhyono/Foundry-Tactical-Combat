@@ -4,7 +4,7 @@
 
 -- Fonts
 FTC.UI.Fonts = {
-  ["meta"] = "FoundryTacticalCombat/lib/fonts/Metamorphous.otf",
+  ["meta"] = "FoundryTacticalCombat/lib/fonts/Metamorphous-Regular.ttf",
   ["standard"] = "EsoUi/Common/Fonts/Univers57.otf",
   ["esobold"] = "EsoUi/Common/Fonts/Univers67.otf",
   ["antique"] = "EsoUI/Common/Fonts/ProseAntiquePSMT.otf",

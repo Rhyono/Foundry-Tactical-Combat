@@ -437,7 +437,8 @@ end
 * --------------------------------
 ]]--
 function FTC.Frames:GroupRange(unitTag, inRange)
-  FTC.Group:UpdateNumCompanionsInGroup()
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Using group frame
   local context = nil
@@ -450,6 +451,10 @@ function FTC.Frames:GroupRange(unitTag, inRange)
 
     -- Otherwise bail out
   else return end
+
+  --[[If the context is Group or Raid then update the number
+   of companions in the group]]--
+  FTC.Group:UpdateNumCompanionsInGroup()
 
   -- Get index and assigned unitTag if it is a companion
   local index = FTC.Group:GetGroupIndexByUnitTag(unitTag)
@@ -478,6 +483,8 @@ end
 * --------------------------------
 ]]--
 function FTC.Frames:GetUltimateFrame(unitTag)
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Using group frame
   local context = nil
@@ -489,9 +496,7 @@ function FTC.Frames:GetUltimateFrame(unitTag)
     context = "Raid"
 
     -- Otherwise bail out
-  else
-    return nil
-  end
+  else return nil end
 
   -- Retrieve the frame
   local index = FTC.Group:GetGroupIndexByUnitTag(unitTag)
@@ -516,6 +521,8 @@ end
  * --------------------------------
  ]]--
 function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shieldValue)
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Setup placeholders
   local frame = nil
@@ -641,6 +648,8 @@ end
 * --------------------------------
 ]]--
 function FTC.Frames:Shield(unitTag, shieldValue, shieldPct, healthValue, healthMax, healthPct)
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Setup placeholders
   local frame = nil

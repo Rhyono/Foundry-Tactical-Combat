@@ -3,7 +3,7 @@
   ]]----------------------------------------------------------
 local FTC = FTC
 FTC.Menu = {}
-LAM2 = LibAddonMenu2
+local LAM2 = LibAddonMenu2
 
 --[[
  * Initialize Menu Component

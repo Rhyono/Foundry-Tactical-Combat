@@ -369,8 +369,10 @@ function FTC.Frames:Regen(unitTag, unitAttributeVisual, powerType, duration)
     distance = -80
   end
 
-  -- Determine context
-  context = (unitTag == "player") and "Player" or "Target"
+  -- Get context
+  if unitTag == 'player' then context = "Player"
+  elseif unitTag == 'reticleover' then context = "Target"
+  else return end
 
   -- Get the attribute name
   if (powerType == COMBAT_MECHANIC_FLAGS_HEALTH) then attrType = "Health"

@@ -83,6 +83,8 @@ end
  * --------------------------------
  ]]--
 function FTC.Buffs:GetBuffs(unitTag)
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Only take action for player and target
   if (unitTag ~= "player" and unitTag ~= "reticleover") then return end
@@ -252,9 +254,14 @@ end
  * --------------------------------
  ]]--
 function FTC.Buffs:Update(unitTag)
+  -- bail if there is no unitTag
+  if not unitTag then return end
 
   -- Get context
-  local context = (unitTag == 'player') and "Player" or "Target"
+  local context
+  if unitTag == 'player' then context = "Player"
+  elseif unitTag == 'reticleover' then context = "Target"
+  else return end
 
   -- Hide target buffs if we have no target
   FTC_TargetBuffs:SetHidden(context == "Target" and FTC.init.Frames and FTC_TargetFrame:IsHidden())

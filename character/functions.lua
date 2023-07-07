@@ -201,15 +201,15 @@ end
  * --------------------------------
  ]]--
 function FTC.Player:UpdateAttribute(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+  -- bail if there is no unitTag
+  if not unitTag then return end
+
   local currentUnitTag = unitTag
   local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player
   local data = nil
-  if (currentUnitTag == nil) then
-    return
-
-  elseif (currentUnitTag == 'player') then
+  if (currentUnitTag == 'player') then
     data = FTC.Player
 
     -- Target
@@ -261,6 +261,9 @@ end
 * --------------------------------
 ]]--
 function FTC.Player:UpdateShield(unitTag, value, maxValue)
+  -- bail if there is no unitTag
+  if not unitTag then return end
+
   local currentUnitTag = unitTag
   local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 

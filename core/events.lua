@@ -188,6 +188,9 @@ running around in a circle around you, that player action does not
 trigger this event
 ]]--
 function FTC.OnPowerUpdate(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+  -- bail if there is no unitTag
+  if not unitTag then return end
+
   local isGroupUnitTag = FTC.Group:IsUnitTagGroupTag(unitTag)
 
   -- Player Updates

@@ -202,6 +202,10 @@ local default = math.floor(FTC.Defaults.FrameDamageColor[1] * 255) .. "," .. mat
 ZO_CreateStringId("FTC_Menu_FDamageC", "Damage Role Color")
 ZO_CreateStringId("FTC_Menu_FDamageCDesc", "Set the color displayed for DPS in FTC group and raid frames. [Default: " .. default .. "]")
 
+local default = (FTC.Defaults.ignoreCritters) and "Enabled" or "Disabled"
+ZO_CreateStringId("FTC_MENU_IGNORE_CRITTERS_NAME", "Ignore Critters")
+ZO_CreateStringId("FTC_MENU_IGNORE_CRITTERS_DESC", "Ignore Critters with custom target frame? [Default: " .. default .. "]")
+
 local default = (FTC.Defaults.EnableRaidFrames) and "Enabled" or "Disabled"
 ZO_CreateStringId("FTC_Menu_FRaid", "Enable Raid Frames")
 ZO_CreateStringId("FTC_Menu_FRaidDesc", "Use custom unit frames for groups of size 4 or more? [Default: " .. default .. "]")

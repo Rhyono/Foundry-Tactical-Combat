@@ -151,4 +151,3 @@ end
 function FTC:Slash(text)
   LAM2:OpenToPanel(FTC_Menu)
 end
-	

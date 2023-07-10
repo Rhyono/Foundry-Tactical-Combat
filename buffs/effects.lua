@@ -106,7 +106,7 @@ end
 --[[
  * Identify Taunt Abilities
  * --------------------------------
- * Called by FTC.Player:GetActionBar()
+ * Called by: None, Unused
  * --------------------------------
  ]]--
 function FTC.Buffs:IsTaunt(name)

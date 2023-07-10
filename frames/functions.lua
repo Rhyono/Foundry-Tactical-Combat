@@ -12,6 +12,7 @@ FTC.Frames.Defaults = {
   ["LabelFrames"] = false,
   ["GroupFrames"] = true,
   ["RaidFrames"] = true,
+  ["ignoreCritters"] = true,
 
   -- Roles
   [LFG_ROLE_INVALID] = "Default",

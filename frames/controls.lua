@@ -267,7 +267,7 @@ end
     UNIT FRAME ANIMATIONS
   ]]----------------------------------------------------------
 
---[[ 
+--[[
  * Unit Frame Opacity Fading
  * --------------------------------
  * Called by FTC.Frames:Attribute()
@@ -315,7 +315,7 @@ function FTC.Frames:Fade(unitTag, frame)
   timeline:PlayFromStart()
 end
 
---[[ 
+--[[
  * Target Frame Execute Animation
  * --------------------------------
  * Called by FTC.Frames:Attribute()
@@ -343,7 +343,7 @@ function FTC.Frames:Execute()
 end
 
 
---[[ 
+--[[
  * Attribute Regeneration Arrows
  * --------------------------------
  * Called by FTC.OnVisualAdded()

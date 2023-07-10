@@ -41,6 +41,12 @@ function FTC.Hotbar:UpdateUltimate(current, cost)
   FTC_UltimatePct:SetText((math.floor((current / cost) * 100)) .. "%")
 end
 
+--[[
+ *
+ * --------------------------------
+ * Called by FTC.Damage:New()
+ * --------------------------------
+ ]]--
 function FTC.Hotbar:UltimateBuff(damage)
 
   -- Bail if it's not a correct trigger

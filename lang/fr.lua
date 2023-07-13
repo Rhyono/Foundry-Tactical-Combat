@@ -202,6 +202,10 @@ local default = math.floor(FTC.Defaults.FrameDamageColor[1]*255)..","..math.floo
 ZO_CreateStringId("FTC_Menu_FDamageC",      "Couleur du DPS")
 ZO_CreateStringId("FTC_Menu_FDamageCDesc",  "Régler la couleur affichée pour les DPS dans les cadres de groupe et raid de FTC [Défaut: "..default.."]")
 
+local default = math.floor(FTC.Defaults.FrameCompanionColor[1] * 255) .. "," .. math.floor(FTC.Defaults.FrameCompanionColor[2] * 255) .. "," .. math.floor(FTC.Defaults.FrameCompanionColor[3] * 255)
+ZO_CreateStringId("FTC_Menu_FCompanionC", "Companion Healthbar Color")
+ZO_CreateStringId("FTC_Menu_FCompanionCDesc", "Set the color displayed for the Companion Healthbar in FTC Group and Raid frames. [Default: " .. default .. "]")
+
 local default = (FTC.Defaults.ignoreCritters) and "Enabled" or "Disabled"
 ZO_CreateStringId("FTC_MENU_IGNORE_CRITTERS_NAME", "Enable Raid Frames")
 ZO_CreateStringId("FTC_MENU_IGNORE_CRITTERS_DESC", "Use custom unit frames for groups of size 4 or more? [Default: " .. default .. "]")

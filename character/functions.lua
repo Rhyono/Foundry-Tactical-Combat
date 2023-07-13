@@ -162,6 +162,7 @@ function FTC.Group:GetGroupIndexByUnitTag(unitTag)
       if info.unitTag == unitTag then return FTC.Group[index].groupIndex end
     end
   end
+  return
 end
 
 function FTC.Group:IsUnitTagGroupTag(unitTag)

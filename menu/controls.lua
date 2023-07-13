@@ -608,6 +608,19 @@ function FTC.Menu:Controls()
       default = FTC.Vars.FrameDamageColor,
     }
 
+    -- Companion Healthbar Color
+    FTC.Menu.options[#FTC.Menu.options + 1] = {
+      type = "colorpicker",
+      name = GetString(FTC_Menu_FCompanionC),
+      tooltip = GetString(FTC_Menu_FCompanionCDesc),
+      getFunc = function() return unpack(FTC.Vars.FrameCompanionColor) end,
+      setFunc = function(r, g, b, a)
+        FTC.Vars.FrameCompanionColor = FTC.Menu:CreateColorTable(r, g, b, a)
+        FTC.Menu:UpdateFrames(nil, nil) -- if both are nil it won't update the value
+      end,
+      default = FTC.Vars.FrameCompanionColor,
+    }
+
     -- Raid Column Size
     FTC.Menu.options[#FTC.Menu.options + 1] = {
       type = "dropdown",

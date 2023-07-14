@@ -12,6 +12,7 @@ FTC.Frames.Defaults = {
   ["LabelFrames"] = false,
   ["GroupFrames"] = true,
   ["RaidFrames"] = true,
+  ["ignoreCritters"] = true,
 
   -- Roles
   [LFG_ROLE_INVALID] = "Default",
@@ -55,7 +56,7 @@ FTC.Frames.Defaults = {
   ["FrameTankColor"] = { 133 / 255, 018 / 255, 013 / 255 },
   ["FrameHealerColor"] = { 117 / 255, 077 / 255, 135 / 255 },
   ["FrameDamageColor"] = { 255 / 255, 196 / 255, 128 / 255 },
-  ["FrameCompanionColor"] = { 133 / 255, 018 / 255, 013 / 255 },
+  ["FrameCompanionColor"] = { 255 / 255, 104 / 255, 97 / 255 },
   ["GroupShowLevel"] = true,
 
   -- Raid Frame
@@ -360,7 +361,7 @@ function FTC.Frames:SetupGroup()
         local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
         frame.plate.name:SetText(label)
 
-        -- Do not Populate raid or group class or leader icon because it's a companion
+        -- Hide icon because it's a companion
         frame.plate.icon:SetWidth(0)
         frame.plate.icon:SetHidden(true)
 
@@ -402,7 +403,7 @@ function FTC.Frames:SetupGroup()
       local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
       frame.plate.name:SetText(label)
 
-      -- Hide companion icon
+      -- Hide icon because it's a companion
       frame.plate.icon:SetWidth(0)
       frame.plate.class:SetHidden(true)
 
@@ -463,6 +464,9 @@ function FTC.Frames:GroupRange(unitTag, inRange)
 
   local currentUnitTag = FTC.Group[index].unitTag
   local frame = _G["FTC_" .. context .. "Frame" .. index]
+
+  -- bail if there is no frame
+  if not frame then return end
 
   -- If a range status was not passed, retrieve it
   if (inRange == nil) then inRange = IsUnitInGroupSupportRange(currentUnitTag) end
@@ -573,6 +577,8 @@ function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shi
     -- Otherwise bail
   else return end
 
+  -- bail if there is no frame
+  if not frame then return end
 
   -- Compute data
   if (enabled or (FTC.Vars.LabelFrames and default ~= nil)) then
@@ -627,7 +633,7 @@ function FTC.Frames:Attribute(unitTag, attribute, powerValue, powerMax, pct, shi
 
       -- Maybe prompt for execute
       if (currentUnitTag == 'reticleover') then
-        frame.execute:SetHidden(not (pct < FTC.Vars.ExecuteThreshold / 100))
+        frame.executeTarget:SetHidden(not (pct < FTC.Vars.ExecuteThreshold / 100))
         if ((not IsUnitDead(currentUnitTag)) and (pct < FTC.Vars.ExecuteThreshold / 100) and (FTC.Target.health.pct > FTC.Vars.ExecuteThreshold / 100)) then FTC.Frames:Execute() end
       end
     end
@@ -930,17 +936,22 @@ function FTC.Frames:SafetyCheck()
     FTC.Frames:Fade('player', FTC_PlayerFrame)
   end
 
-  -- Group frames
-  if (IsUnitGrouped('player')) then
-    local context = nil
-    if (FTC.Group.groupSize <= STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.GroupFrames) then context = "Group"
-    elseif (FTC.Vars.RaidFrames) then context = "Raid"
-    else return end
+  -- loop over group members and update health
+  for groupSizeIndex = 1, FTC.Group.groupSize do
+    local unitTag = GetGroupUnitTagByIndex(groupSizeIndex)
+    if DoesUnitExist(unitTag) and not IsUnitInCombat(unitTag) then
+      FTC.Player:UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil, nil, nil)
+      FTC.Frames:GroupRange(unitTag, nil)
+    end
+  end
 
-    -- Update attributes out of combat
-    for i = 1, GetGroupSize() do
-      if (not IsUnitInCombat('player')) then FTC.Player:UpdateAttribute(GetGroupUnitTagByIndex(i), COMBAT_MECHANIC_FLAGS_HEALTH, nil, nil, nil) end
-      FTC.Frames:GroupRange('group' .. i, nil)
+  -- loop over companions and update health
+  for groupSizeIndex = 1, FTC.Group.groupSize do
+    local unitTag = GetGroupUnitTagByIndex(groupSizeIndex)
+    local companionUnitTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
+    if DoesUnitExist(companionUnitTag) and not IsUnitInCombat(companionUnitTag) then
+      FTC.Player:UpdateAttribute(companionUnitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil, nil, nil)
+      FTC.Frames:GroupRange(companionUnitTag, nil)
     end
   end
 end

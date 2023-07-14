@@ -101,7 +101,7 @@ function FTC.Frames:Controls()
   -- Nameplate
   local plate = FTC.UI:Control("FTC_TargetFrame_Plate", target, { target:GetWidth(), (target:GetHeight() / 4) }, { TOP, TOP, 0, 0 }, false)
   plate.name = FTC.UI:Label("FTC_TargetFrame_PlateName", plate, { plate:GetWidth() - 42, 30 }, { BOTTOMLEFT, BOTTOMLEFT, 6, 0 }, FTC.UI:Font(FTC.Vars.FrameFont1, FTC.Vars.FrameFontSize + 2, true), nil, { 0, 1 }, "Target Name (Level)", false)
-  plate.class = FTC.UI:Texture("FTC_TargetFrame_PlateClass", plate, { 36, 36 }, { BOTTOMRIGHT, BOTTOMRIGHT, 0, 2 }, "/esoui/art/contacts/social_classicon_" .. FTC.Player.class .. ".dds", false)
+  plate.class = FTC.UI:Texture("FTC_TargetFrame_PlateClass", plate, { 36, 36 }, { BOTTOMRIGHT, BOTTOMRIGHT, 0, 2 }, GetClassIcon(GetUnitClassId('player')), false)
   target.plate = plate
 
   -- Health Bar
@@ -115,9 +115,9 @@ function FTC.Frames:Controls()
   target.health = health
 
   -- Execute Indicator
-  local execute = FTC.UI:Texture("FTC_TargetFrame_Execute", health, { 36, 36 }, { CENTER, CENTER, 0, 0 }, '/esoui/art/icons/mapkey/mapkey_groupboss.dds', true)
-  execute:SetDrawLayer(1)
-  target.execute = execute
+  local executeTarget = FTC.UI:Texture("FTC_TargetFrame_Execute", health, { 36, 36 }, { CENTER, CENTER, 0, 0 }, '/esoui/art/icons/mapkey/mapkey_groupboss.dds', true)
+  executeTarget:SetDrawLayer(1)
+  target.executeTarget = executeTarget
 
   -- Titleplate
   local lplate = FTC.UI:Control("FTC_TargetFrame_LPlate", target, { target:GetWidth(), (target:GetHeight() / 4) }, { TOP, BOTTOM, 0, 6, target.health }, false)
@@ -152,7 +152,7 @@ function FTC.Frames:Controls()
 
   -- Iterate over four group members
   local anchor = { TOP, TOP, 0, 0, group }
-  for i = 1, 4 do
+  for i = 1, STANDARD_GROUP_SIZE_THRESHOLD do
     local member = FTC.UI:Control("FTC_GroupFrame" .. i, group, { FTC.Vars.GroupWidth, FTC.Vars.GroupHeight / 4 }, anchor, true)
     member:SetAlpha(FTC.Vars.FrameOpacityIn / 100)
 
@@ -160,7 +160,7 @@ function FTC.Frames:Controls()
     local plate = FTC.UI:Control("FTC_GroupFrame" .. i .. "_Plate", member, { member:GetWidth(), member:GetHeight() / 3 }, { TOP, TOP, 0, 0 }, false)
     plate.icon = FTC.UI:Texture("FTC_GroupFrame" .. i .. "_Icon", plate, { 24, 24 }, { BOTTOMLEFT, BOTTOMLEFT, 0, 0 }, "/esoui/art/lfg/lfg_leader_icon.dds", false)
     plate.name = FTC.UI:Label("FTC_GroupFrame" .. i .. "_Name", plate, { plate:GetWidth() - 24, plate:GetHeight() }, { LEFT, RIGHT, 6, 0, plate.icon }, FTC.UI:Font(FTC.Vars.FrameFont1, FTC.Vars.GroupFontSize, true), nil, { 0, 1 }, "Member " .. i, false)
-    plate.class = FTC.UI:Texture("FTC_GroupFrame" .. i .. "_Class", plate, { 24, 24 }, { BOTTOMRIGHT, BOTTOMRIGHT, 0, 0 }, "/esoui/art/contacts/social_classicon_" .. FTC.Player.class .. ".dds", false)
+    plate.class = FTC.UI:Texture("FTC_GroupFrame" .. i .. "_Class", plate, { 24, 24 }, { BOTTOMRIGHT, BOTTOMRIGHT, 0, 0 }, GetClassIcon(GetUnitClassId('player')), false)
     member.plate = plate
 
     -- Health bar
@@ -214,7 +214,7 @@ function FTC.Frames:Controls()
 
   -- Iterate over 24 possible raid members
   local anchor = { TOPLEFT, TOPLEFT, 0, 0, raid }
-  for i = 1, 24 do
+  for i = 1, LARGE_GROUP_SIZE_THRESHOLD do
     local member = FTC.UI:Control("FTC_RaidFrame" .. i, raid, { FTC.Vars.RaidWidth, FTC.Vars.RaidHeight }, anchor, true)
     member:SetAlpha(FTC.Vars.FrameOpacityIn / 100)
 
@@ -267,10 +267,11 @@ end
     UNIT FRAME ANIMATIONS
   ]]----------------------------------------------------------
 
---[[ 
+--[[
  * Unit Frame Opacity Fading
  * --------------------------------
- * Called by FTC.Frames:Attribute()
+ * Called by FTC.Frames:SafetyCheck()
+ * Called by FTC.OnCombatState()
  * --------------------------------
  ]]--
 FTC.Frames.resetAnim = false
@@ -315,7 +316,7 @@ function FTC.Frames:Fade(unitTag, frame)
   timeline:PlayFromStart()
 end
 
---[[ 
+--[[
  * Target Frame Execute Animation
  * --------------------------------
  * Called by FTC.Frames:Attribute()
@@ -343,7 +344,7 @@ function FTC.Frames:Execute()
 end
 
 
---[[ 
+--[[
  * Attribute Regeneration Arrows
  * --------------------------------
  * Called by FTC.OnVisualAdded()

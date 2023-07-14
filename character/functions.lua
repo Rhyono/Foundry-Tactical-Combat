@@ -81,12 +81,14 @@ end
  * --------------------------------
  ]]--
 function FTC.Target:Update()
-
   -- Hide default frame
   if (FTC.init.Frames and not FTC.Vars.DefaultTargetFrame) then FTC.TARGET_WINDOW:SetHidden(true) end
 
+  local isCritter = false
+  if FTC.Vars.ignoreCritters then isCritter = FTC:IsCritter('reticleover') end
+
   -- Ignore empty and critters, but not during move mode
-  local ignore = ((not DoesUnitExist('reticleover')) or FTC:IsCritter('reticleover')) and not FTC.move
+  local ignore = ((not DoesUnitExist('reticleover')) or isCritter) and not FTC.move
 
   -- Update valid targets
   if (not ignore) then
@@ -160,6 +162,7 @@ function FTC.Group:GetGroupIndexByUnitTag(unitTag)
       if info.unitTag == unitTag then return FTC.Group[index].groupIndex end
     end
   end
+  return
 end
 
 function FTC.Group:IsUnitTagGroupTag(unitTag)
@@ -369,8 +372,17 @@ end
  * --------------------------------
  ]]--
 function FTC:IsCritter(unitTag)
-  -- Critters meet all the following criteria: Level 1, Difficulty = NONE, and Neutral or Friendly reaction
-  return ((GetUnitLevel(unitTag) == 1) and (GetUnitDifficulty(unitTag) == MONSTER_DIFFICULTY_NONE) and (GetUnitReaction(unitTag) == UNIT_REACTION_NEUTRAL or GetUnitReaction(unitTag) == UNIT_REACTION_FRIENDLY))
+    -- bail if there is no unitTag
+  if not unitTag then return end
+
+  -- Critters meet all the following criteria: EffectiveLevel 50, Effective Health 1, Difficulty = NONE, and Neutral or Friendly reaction
+  local isBaseLevel = GetUnitEffectiveLevel(unitTag) == 50
+  local _, _, effectiveMaxHealth = GetUnitPower(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
+  local hasNegligibleHealth = effectiveMaxHealth == 1
+  local difficultyNone = GetUnitDifficulty(unitTag) == MONSTER_DIFFICULTY_NONE
+  local friendlyOrNeutral = (GetUnitReaction(unitTag) == UNIT_REACTION_NEUTRAL or GetUnitReaction(unitTag) == UNIT_REACTION_FRIENDLY)
+  local isCritter = (isBaseLevel and hasNegligibleHealth and difficultyNone and friendlyOrNeutral)
+  return isCritter
 end
 
 --[[

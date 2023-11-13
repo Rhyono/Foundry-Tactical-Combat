@@ -173,13 +173,13 @@ end
 
 function FTC.Group:IsStandardGroupSize()
   -- Is the current group size less than the
-  local groupSize = FTC.Group.groupSize <= STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.GroupFrames
+  local groupSize = FTC.Group.groupSize <= SMALL_GROUP_SIZE_THRESHOLD and FTC.Vars.GroupFrames
   return groupSize
 end
 
 function FTC.Group:IsLargeGroupSize()
   -- the player and the players companion
-  local groupSize = FTC.Group.groupSize > STANDARD_GROUP_SIZE_THRESHOLD and FTC.Vars.RaidFrames
+  local groupSize = FTC.Group.groupSize > SMALL_GROUP_SIZE_THRESHOLD and FTC.Vars.RaidFrames
   return groupSize
 end
 

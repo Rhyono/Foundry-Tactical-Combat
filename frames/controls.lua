@@ -152,7 +152,7 @@ function FTC.Frames:Controls()
 
   -- Iterate over four group members
   local anchor = { TOP, TOP, 0, 0, group }
-  for i = 1, STANDARD_GROUP_SIZE_THRESHOLD do
+  for i = 1, SMALL_GROUP_SIZE_THRESHOLD do
     local member = FTC.UI:Control("FTC_GroupFrame" .. i, group, { FTC.Vars.GroupWidth, FTC.Vars.GroupHeight / 4 }, anchor, true)
     member:SetAlpha(FTC.Vars.FrameOpacityIn / 100)
 
@@ -212,7 +212,7 @@ function FTC.Frames:Controls()
   raid:SetMovable(true)
   raid:SetHandler("OnMouseUp", function(self) FTC.Menu:SaveAnchor(self) end)
 
-  -- Iterate over 24 possible raid members
+  -- Iterate over 12 possible raid members
   local anchor = { TOPLEFT, TOPLEFT, 0, 0, raid }
   for i = 1, LARGE_GROUP_SIZE_THRESHOLD do
     local member = FTC.UI:Control("FTC_RaidFrame" .. i, raid, { FTC.Vars.RaidWidth, FTC.Vars.RaidHeight }, anchor, true)

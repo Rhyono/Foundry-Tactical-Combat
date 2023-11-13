@@ -248,18 +248,21 @@ function FTC.Frames:SetupGroup()
     context = "Group"
     FTC_RaidFrame:SetHidden(true)
     ZO_UnitFramesGroups:SetHidden(true)
+    if FTC.Group.groupSize > SMALL_GROUP_SIZE_THRESHOLD then FTC.Group.groupSize = SMALL_GROUP_SIZE_THRESHOLD end
 
     -- Using raid frames
   elseif FTC.Group:IsLargeGroupSize() then
     context = "Raid"
     FTC_GroupFrame:SetHidden(true)
     ZO_UnitFramesGroups:SetHidden(true)
+    if FTC.Group.groupSize > LARGE_GROUP_SIZE_THRESHOLD then FTC.Group.groupSize = LARGE_GROUP_SIZE_THRESHOLD end
 
     -- Show Companion Frame
   elseif showCompanion then
     context = "Group"
     FTC_RaidFrame:SetHidden(true)
     ZO_UnitFramesGroups:SetHidden(true)
+    if FTC.Group.groupSize > SMALL_GROUP_SIZE_THRESHOLD then FTC.Group.groupSize = SMALL_GROUP_SIZE_THRESHOLD end
 
     -- Using default frames
   else
@@ -272,6 +275,8 @@ function FTC.Frames:SetupGroup()
 
   -- Get the parent container
   local container = _G["FTC_" .. context .. "Frame"]
+  local maxGroupSize = SMALL_GROUP_SIZE_THRESHOLD
+  if context == "Raid" then maxGroupSize = LARGE_GROUP_SIZE_THRESHOLD end
 
   if not showCompanion then
     -- Iterate over only group members first
@@ -280,50 +285,52 @@ function FTC.Frames:SetupGroup()
       local hidePlayer = (context == "Group") and FTC.Vars.GroupHidePlayer and (GetDisplayName() == GetUnitDisplayName(unitTag))
       if (DoesUnitExist(unitTag)) and not hidePlayer then
         groupIndex = groupIndex + 1
-        local frame = container["member" .. groupIndex]
-        FTC.Group[groupIndex].unitTag = unitTag
-        FTC.Group[groupIndex].groupIndex = groupIndex
+        if groupIndex <= maxGroupSize then
+          local frame = container["member" .. groupIndex]
+          FTC.Group[groupIndex].unitTag = unitTag
+          FTC.Group[groupIndex].groupIndex = groupIndex
 
-        -- Display the frame
-        frame:SetHidden(false)
+          -- Display the frame
+          frame:SetHidden(false)
 
-        -- Configure the nameplate
-        local name = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>", GetUnitName(unitTag))
-        local level = GetUnitChampionPoints(unitTag) > 0 and "c" .. GetUnitChampionPoints(unitTag) or GetUnitLevel(unitTag)
-        local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
+          -- Configure the nameplate
+          local name = (FTC.Vars.GroupShowAccount) and GetUnitDisplayName(unitTag) or zo_strformat("<<!aC:1>>", GetUnitName(unitTag))
+          local level = GetUnitChampionPoints(unitTag) > 0 and "c" .. GetUnitChampionPoints(unitTag) or GetUnitLevel(unitTag)
+          local classIcon = GetClassIcon(GetUnitClassId(unitTag)) or nil
 
-        -- Get role
-        local role = GetGroupMemberSelectedRole(unitTag)
-        if not role then role = LFG_ROLE_INVALID end
-        role = FTC.Frames.Defaults[role]
-        FTC.Group[groupIndex].role = role
+          -- Get role
+          local role = GetGroupMemberSelectedRole(unitTag)
+          if not role then role = LFG_ROLE_INVALID end
+          role = FTC.Frames.Defaults[role]
+          FTC.Group[groupIndex].role = role
 
-        -- Determine bar color
-        local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
-        -- Color bar by role
-        frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
-        frame.health.bar:SetColor(color[1], color[2], color[3], 1)
-        -- Change the bar color
-        FTC.Frames:GroupRange(unitTag, nil)
+          -- Determine bar color
+          local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
+          -- Color bar by role
+          frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
+          frame.health.bar:SetColor(color[1], color[2], color[3], 1)
+          -- Change the bar color
+          FTC.Frames:GroupRange(unitTag, nil)
 
-        -- Populate nameplate
-        local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
-        frame.plate.name:SetText(label)
+          -- Populate nameplate
+          local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
+          frame.plate.name:SetText(label)
 
-        -- Populate raid icon
-        if (context == "Raid") then
-          frame.plate.icon:SetTexture(IsUnitGroupLeader(unitTag) and "/esoui/art/lfg/lfg_leader_icon.dds" or classIcon)
-          frame.plate.icon:SetHidden(classIcon == nil)
+          -- Populate raid icon
+          if (context == "Raid") then
+            frame.plate.icon:SetTexture(IsUnitGroupLeader(unitTag) and "/esoui/art/lfg/lfg_leader_icon.dds" or classIcon)
+            frame.plate.icon:SetHidden(classIcon == nil)
 
-          -- Populate group icons
-        elseif (context == "Group") then
-          frame.plate.icon:SetWidth(IsUnitGroupLeader(unitTag) and 24 or 0)
-          frame.plate.class:SetTexture(classIcon)
-          frame.plate.class:SetHidden(classIcon == nil)
+            -- Populate group icons
+          elseif (context == "Group") then
+            frame.plate.icon:SetWidth(IsUnitGroupLeader(unitTag) and 24 or 0)
+            frame.plate.class:SetTexture(classIcon)
+            frame.plate.class:SetHidden(classIcon == nil)
+          end
+
+          -- Populate health data
+          FTC.Player:UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
         end
-
-        -- Populate health data
-        FTC.Player:UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
       end
     end
 
@@ -333,41 +340,42 @@ function FTC.Frames:SetupGroup()
       local companionUnitTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
       if (DoesUnitExist(companionUnitTag)) then
         groupIndex = groupIndex + 1
-        local frame = container["member" .. groupIndex]
-        FTC.Group[groupIndex].unitTag = companionUnitTag
-        FTC.Group[groupIndex].groupIndex = groupIndex
+        if groupIndex <= maxGroupSize then
+          local frame = container["member" .. groupIndex]
+          FTC.Group[groupIndex].unitTag = companionUnitTag
+          FTC.Group[groupIndex].groupIndex = groupIndex
 
-        -- Display the frame
-        frame:SetHidden(false)
+          -- Display the frame
+          frame:SetHidden(false)
 
-        -- Configure the nameplate
-        local name = zo_strformat("<<!aC:1>>", GetUnitName(companionUnitTag))
-        local level = GetUnitLevel(companionUnitTag)
+          -- Configure the nameplate
+          local name = zo_strformat("<<!aC:1>>", GetUnitName(companionUnitTag))
+          local level = GetUnitLevel(companionUnitTag)
 
-        -- Get role
-        local role = FTC.Frames.Defaults[FTC_COMPANION_ROLE]
-        FTC.Group[groupIndex].role = role
+          -- Get role
+          local role = FTC.Frames.Defaults[FTC_COMPANION_ROLE]
+          FTC.Group[groupIndex].role = role
 
-        -- Determine bar color
-        local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
-        -- Color bar by role
-        frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
-        frame.health.bar:SetColor(color[1], color[2], color[3], 1)
-        -- Change the bar color
-        --[[TODO: Can the companion be out of range? ]]--
-        FTC.Frames:GroupRange(companionUnitTag, nil)
+          -- Determine bar color
+          local color = (FTC.Vars.ColorRoles) and FTC.Vars["Frame" .. role .. "Color"] or FTC.Vars.FrameHealthColor
+          -- Color bar by role
+          frame.health:SetCenterColor(color[1] / 5, color[2] / 5, color[3] / 5, 1)
+          frame.health.bar:SetColor(color[1], color[2], color[3], 1)
+          -- Change the bar color
+          --[[TODO: Can the companion be out of range? ]]--
+          FTC.Frames:GroupRange(companionUnitTag, nil)
 
-        -- Populate nameplate
-        local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
-        frame.plate.name:SetText(label)
+          -- Populate nameplate
+          local label = (context == "Group" and FTC.Vars.GroupShowLevel) and name .. " (" .. level .. ")" or name
+          frame.plate.name:SetText(label)
 
-        -- Hide icon because it's a companion
-        frame.plate.icon:SetWidth(0)
-        frame.plate.icon:SetHidden(true)
+          -- Hide icon because it's a companion
+          frame.plate.icon:SetWidth(0)
+          frame.plate.icon:SetHidden(true)
 
-        -- Populate health data
-        FTC.Player:UpdateAttribute(companionUnitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
-
+          -- Populate health data
+          FTC.Player:UpdateAttribute(companionUnitTag, COMBAT_MECHANIC_FLAGS_HEALTH, nil)
+        end
       end
     end
   end
@@ -416,7 +424,7 @@ function FTC.Frames:SetupGroup()
   -- hide all other unit frames
   local hideStartIndex = groupIndex + 1
   local hideEndIndex
-  if context == "Group" then hideEndIndex = STANDARD_GROUP_SIZE_THRESHOLD
+  if context == "Group" then hideEndIndex = SMALL_GROUP_SIZE_THRESHOLD
   elseif context == "Raid" then hideEndIndex = LARGE_GROUP_SIZE_THRESHOLD end
 
   for i = hideStartIndex, hideEndIndex do

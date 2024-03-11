@@ -1,18 +1,17 @@
 --[[----------------------------------------------------------
     INITIALIZE UI ASSETS
   ]]----------------------------------------------------------
+local LMP = LibMediaProvider
 
 -- Fonts
-FTC.UI.Fonts = {
-  ["meta"] = "FoundryTacticalCombat/lib/fonts/Metamorphous-Regular.ttf",
-  ["standard"] = "EsoUi/Common/Fonts/Univers57.otf",
-  ["esobold"] = "EsoUi/Common/Fonts/Univers67.otf",
-  ["antique"] = "EsoUI/Common/Fonts/ProseAntiquePSMT.otf",
-  ["handwritten"] = "EsoUI/Common/Fonts/Handwritten_Bold.otf",
-  ["trajan"] = "EsoUI/Common/Fonts/TrajanPro-Regular.otf",
-  ["futura"] = "EsoUI/Common/Fonts/FuturaStd-CondensedLight.otf",
-  ["futurabold"] = "EsoUI/Common/Fonts/FuturaStd-Condensed.otf",
-}
+function FTC:RegisterFonts()
+  LMP:Register("font", "Metamorphous", "$(FTC_METAMORPHOUS_FONT)")
+  FTC.fontRegistered = true
+end
+
+function FTC:SetFontListChoices()
+  FTC.fontListChoices = LMP:List(LMP.MediaType.FONT)
+end
 
 -- Textures
 FTC.UI.Textures = {
@@ -28,6 +27,8 @@ FTC.UI.Textures = {
  * --------------------------------
  ]]--
 function FTC.UI:Initialize()
+  FTC:RegisterFonts()
+  FTC:SetFontListChoices()
 
   -- Create core controls
   FTC.UI:Controls()
@@ -55,24 +56,23 @@ end
  * --------------------------------
  ]]--
 function FTC.UI:TranslateFont(font)
-
   -- Maintain a translation between tags and names
   local fonts = {
     ['meta'] = "Metamorphous",
-    ["standard"] = "ESO Standard",
-    ["esobold"] = "ESO Bold",
-    ["antique"] = "Prose Antique",
-    ["handwritten"] = "Handwritten",
+    ["standard"] = "Univers 57",
+    ["esobold"] = "Univers 67",
+    ["antique"] = "ProseAntique",
+    ["handwritten"] = "Skyrim Handwritten",
     ["trajan"] = "Trajan Pro",
-    ["futura"] = "Futura Standard",
-    ["futurabold"] = "Futura Bold",
+    ["futura"] = "Futura Condensed",
+    ["futurabold"] = "Futura Condensed Bold",
   }
 
-  -- Iterate through the table matching
-  for k, v in pairs(fonts) do
-    if (font == k) then return v
-    elseif (font == v) then return k end
-  end
+  -- Use the font tag as a key to directly access the translation
+  local translatedFont = fonts[font]
+
+  -- Check if the translation exists, if not, return the original font argument
+  return translatedFont or font
 end
 
 --[[
@@ -82,13 +82,13 @@ end
  * --------------------------------
  ]]--
 function FTC.UI:Font(font, size, shadow)
-
-  font = (FTC.UI.Fonts[font] ~= nil) and FTC.UI.Fonts[font] or font
+  local fontRequested = FTC.UI:TranslateFont(font) or "Consolas"
+  local fontFilename = LMP:Fetch('font', fontRequested)
   size = size or 14
   shadow = shadow and '|soft-shadow-thick' or ''
 
   -- Return font
-  return font .. '|' .. size .. shadow
+  return fontFilename .. '|' .. size .. shadow
 end
 
 --[[----------------------------------------------------------

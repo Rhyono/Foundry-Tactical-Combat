@@ -17,7 +17,7 @@
     Author:   		Atropos / Philgo68 / Demiknight (Dark Brotherhood) / Rhyono (Homestead/Morrowind/HotR/CC/Dragon Bones/Summerset/Wolfhunter/Murkmire/Wrathstone/Elsweyr/Scalebreaker/Dragonhold/Harrowstorm/Greymoor/Stonethorn/Markarth/FoA/Blackwood/Walking Flame/Deadlands)
 	  Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls / fugue / hypatian / Sharlikran
     Email:    		atropos@tamrielfoundry.com
-    Version:  		1.30
+    Version:  		1.31
     Updated:  		2023-07-12
   ]]--
 
@@ -29,7 +29,7 @@
 FTC.addOnName = "FoundryTacticalCombat"
 FTC.tag = "FTC"
 FTC.modName = "Foundry Tactical Combat"
-FTC.version = 1.30
+FTC.version = 1.31
 FTC.settings = 0.60
 FTC.language = GetCVar("language.2")
 FTC.UI = WINDOW_MANAGER:CreateTopLevelWindow("FTC_UI")
@@ -48,6 +48,7 @@ FTC.Defaults = {
 
 -- Track component initialization
 FTC.init = {}
+FTC.fontListChoices = {}
 
 -- Track custom display conditions
 FTC.inMenu = false

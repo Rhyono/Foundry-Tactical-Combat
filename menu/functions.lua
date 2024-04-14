@@ -616,3 +616,13 @@ function FTC.Menu:SaveAnchor(control)
   -- Save the anchors
   if (isValidAnchor) then FTC.Vars[control:GetName()] = { point, relativePoint, offsetX, offsetY, relativeTo } end
 end
+
+--[[
+ * Slash Function
+ * --------------------------------
+ * Triggered by /ftc or /FTC
+ * --------------------------------
+ ]]--
+function FTC.Menu:Slash(text)
+  LAM2:OpenToPanel(FTC_Menu)
+end

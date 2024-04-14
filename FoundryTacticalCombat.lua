@@ -17,7 +17,7 @@
     Author:   		Atropos / Philgo68 / Demiknight (Dark Brotherhood) / Rhyono (Homestead/Morrowind/HotR/CC/Dragon Bones/Summerset/Wolfhunter/Murkmire/Wrathstone/Elsweyr/Scalebreaker/Dragonhold/Harrowstorm/Greymoor/Stonethorn/Markarth/FoA/Blackwood/Walking Flame/Deadlands)
 	  Contributors:	decay2 / Scootworks / Hoft / Antisenil / sirinsidiator / mitbulls / fugue / hypatian / Sharlikran
     Email:    		atropos@tamrielfoundry.com
-    Version:  		1.31
+    Version:  		1.32
     Updated:  		2023-07-12
   ]]--
 
@@ -29,7 +29,7 @@
 FTC.addOnName = "FoundryTacticalCombat"
 FTC.tag = "FTC"
 FTC.modName = "Foundry Tactical Combat"
-FTC.version = 1.31
+FTC.version = 1.32
 FTC.settings = 0.60
 FTC.language = GetCVar("language.2")
 FTC.UI = WINDOW_MANAGER:CreateTopLevelWindow("FTC_UI")
@@ -111,8 +111,8 @@ function FTC.Initialize(eventCode, addOnName)
   FTC:RegisterEvents()
 
   -- Register Slash Command
-  SLASH_COMMANDS["/" .. FTC.tag] = FTC.Slash
-  SLASH_COMMANDS["/" .. string.lower(FTC.tag)] = FTC.Slash
+  SLASH_COMMANDS["/" .. FTC.tag] = FTC.Menu.Slash
+  SLASH_COMMANDS["/" .. string.lower(FTC.tag)] = FTC.Menu.Slash
 
   -- Fire Setup Callback
   CALLBACK_MANAGER:FireCallbacks("FTC_Ready")

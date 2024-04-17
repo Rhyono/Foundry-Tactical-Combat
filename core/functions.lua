@@ -141,13 +141,3 @@ function FTC.DisplayNumber(number, places)
   -- Return the output
   return output
 end
-
---[[
- * Slash Function
- * --------------------------------
- * Triggered by /ftc or /FTC
- * --------------------------------
- ]]--
-function FTC:Slash(text)
-  LAM2:OpenToPanel(FTC_Menu)
-end
